@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { ExternalLink, ArrowUpRight, Sparkles } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -17,15 +18,38 @@ export const ToolCard: React.FC<ToolCardProps> = ({ tool }) => {
       to={`/tool/${tool.id}`}
       className="block h-full w-full outline-none"
     >
-      <Card className={cn(
-        "group relative flex flex-col aspect-square overflow-hidden rounded-xl border-border/60 bg-gradient-to-br from-card to-card/50",
-        "transition-all duration-300 ease-out",
-        "hover:-translate-y-1 hover:shadow-xl hover:shadow-primary/5 hover:border-primary/50",
-        "focus-visible:ring-2 focus-visible:ring-primary"
-      )}>
-        
-        {/* Decorative Gradient Overlay on Hover */}
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+      <motion.div
+        whileHover={{ 
+          y: -8,
+          transition: { duration: 0.3, ease: 'easeOut' }
+        }}
+        whileTap={{ scale: 0.98 }}
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4 }}
+      >
+        <Card className={cn(
+          "group relative flex flex-col aspect-square overflow-hidden rounded-xl border-border/60 bg-gradient-to-br from-card to-card/50",
+          "transition-all duration-300 ease-out",
+          "hover:shadow-xl hover:shadow-primary/10 hover:border-primary/50",
+          "focus-visible:ring-2 focus-visible:ring-primary"
+        )}>
+          
+          {/* Decorative Gradient Overlay on Hover */}
+          <motion.div 
+            className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent pointer-events-none" 
+            initial={{ opacity: 0 }}
+            whileHover={{ opacity: 1 }}
+            transition={{ duration: 0.5 }}
+          />
+          
+          {/* Animated shimmer effect */}
+          <motion.div
+            className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent"
+            initial={{ x: '-100%' }}
+            whileHover={{ x: '100%' }}
+            transition={{ duration: 0.8, ease: 'easeInOut' }}
+          />
 
         {/* HEADER: Title & Badge */}
         <CardHeader className="p-5 pb-2 space-y-0 flex-shrink-0 relative z-10">
