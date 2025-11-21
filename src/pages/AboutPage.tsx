@@ -11,21 +11,43 @@ const AboutPage: React.FC = () => {
       icon: <Zap className="h-8 w-8" />,
       title: 'Real-Time Updates',
       description: 'Automated hourly tracking of newly released AI tools from multiple sources including ProductHunt, TechCrunch, and more.',
+      color: 'from-primary to-primary-hover',
     },
     {
       icon: <Target className="h-8 w-8" />,
       title: 'Smart Categorization',
       description: 'Tools are automatically organized into relevant categories with intelligent tagging for easy discovery.',
+      color: 'from-accent to-purple-600',
     },
     {
       icon: <Globe className="h-8 w-8" />,
       title: 'Multiple Sources',
       description: 'We aggregate data from AI directories, tech news outlets, and social platforms to ensure comprehensive coverage.',
+      color: 'from-success to-green-600',
     },
     {
       icon: <TrendingUp className="h-8 w-8" />,
       title: 'Latest Innovations',
       description: 'Stay ahead of the curve with instant access to the newest AI tools as soon as they launch.',
+      color: 'from-chart-4 to-orange-600',
+    },
+  ];
+
+  const values = [
+    {
+      icon: <Rocket className="h-6 w-6" />,
+      title: 'Innovation First',
+      description: 'We prioritize showcasing cutting-edge AI innovations',
+    },
+    {
+      icon: <Shield className="h-6 w-6" />,
+      title: 'Quality Data',
+      description: 'Verified and accurate information about every tool',
+    },
+    {
+      icon: <Heart className="h-6 w-6" />,
+      title: 'Community Driven',
+      description: 'Built for AI enthusiasts, by AI enthusiasts',
     },
   ];
 
