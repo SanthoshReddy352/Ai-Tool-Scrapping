@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Filter, X } from 'lucide-react';
+import { Search, Filter, X, Sparkles } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -42,9 +42,7 @@ const SearchPage: React.FC = () => {
     setAllTags(tagsData);
   };
 
-  // UPDATED: Added pageIndex parameter to prevent duplicate fetching
   const performSearch = async (reset = false, pageIndex?: number) => {
-    // Use the passed pageIndex if available, otherwise fall back to state
     const currentPage = reset ? 0 : (pageIndex ?? page);
     
     setLoading(true);
@@ -72,7 +70,6 @@ const SearchPage: React.FC = () => {
     setLoading(false);
   };
 
-  // UPDATED: Calculate next page and pass it explicitly
   const loadMore = () => {
     const nextPage = page + 1;
     setPage(nextPage);
@@ -97,12 +94,14 @@ const SearchPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <section className="relative bg-gradient-to-b from-primary/10 to-background py-16 px-4 overflow-hidden">
+      <section className="relative bg-gradient-to-br from-accent/10 via-primary/5 to-background py-20 px-4 overflow-hidden">
+        {/* Animated background */}
         <motion.div
-          className="absolute top-10 left-20 w-80 h-80 bg-accent/5 rounded-full blur-3xl"
+          className="absolute top-10 left-20 w-96 h-96 bg-gradient-to-br from-accent/20 to-primary/20 rounded-full blur-3xl"
           animate={{
-            scale: [1, 1.2, 1],
-            opacity: [0.2, 0.4, 0.2],
+            scale: [1, 1.3, 1],
+            opacity: [0.2, 0.5, 0.2],
+            x: [0, 40, 0],
           }}
           transition={{
             duration: 9,
@@ -110,36 +109,61 @@ const SearchPage: React.FC = () => {
             ease: "easeInOut",
           }}
         />
+        <motion.div
+          className="absolute bottom-10 right-20 w-[500px] h-[500px] bg-gradient-to-br from-primary/20 to-accent/20 rounded-full blur-3xl"
+          animate={{
+            scale: [1.2, 1, 1.2],
+            opacity: [0.2, 0.4, 0.2],
+            y: [0, -40, 0],
+          }}
+          transition={{
+            duration: 11,
+            repeat: Infinity,
+            ease: "easeInOut",
+          }}
+        />
         
         <div className="max-w-7xl mx-auto relative z-10">
           <FadeInWhenVisible direction="down" duration={0.6}>
-            <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4 text-center">
-              Search AI Tools
-            </h1>
-          </FadeInWhenVisible>
-          <FadeInWhenVisible delay={0.2} duration={0.6}>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto text-center mb-8">
-              Find the perfect AI tool for your needs using our advanced search and filtering options.
-            </p>
+            <div className="text-center mb-8">
+              <motion.div
+                className="inline-flex items-center justify-center gap-2 mb-6"
+                animate={{ y: [0, -5, 0] }}
+                transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+              >
+                <div className="p-3 bg-gradient-to-br from-accent to-primary rounded-2xl">
+                  <Search className="h-10 w-10 text-white" />
+                </div>
+              </motion.div>
+              <h1 className="text-5xl md:text-6xl font-bold mb-4">
+                <span className="gradient-text">Advanced Search</span>
+              </h1>
+              <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto">
+                Find the perfect AI tool for your needs using our powerful search and filtering options.
+              </p>
+            </div>
           </FadeInWhenVisible>
 
           <FadeInWhenVisible delay={0.3} direction="up" duration={0.6}>
-            <div className="max-w-3xl mx-auto space-y-4">
+            <div className="max-w-4xl mx-auto space-y-6">
+              {/* Search Bar */}
               <motion.div 
                 className="relative"
                 whileHover={{ scale: 1.01 }}
                 transition={{ duration: 0.2 }}
               >
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                 <Input
                   type="text"
-                  placeholder="Search by name or description..."
+                  placeholder="Search by name, description, or features..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 h-12 text-base"
+                  className="pl-12 h-14 text-base border-2 border-border/50 focus:border-primary shadow-lg glass"
+                  data-testid="search-input"
                 />
               </motion.div>
 
+              {/* Filters Row */}
               <div className="flex flex-col md:flex-row gap-4">
                 <motion.div
                   whileHover={{ scale: 1.01 }}
@@ -147,8 +171,8 @@ const SearchPage: React.FC = () => {
                   className="flex-1"
                 >
                   <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                    <SelectTrigger className="w-full">
-                      <Filter className="h-4 w-4 mr-2" />
+                    <SelectTrigger className="w-full h-12 border-2 glass" data-testid="category-filter">
+                      <Filter className="h-5 w-5 mr-2" />
                       <SelectValue placeholder="All Categories" />
                     </SelectTrigger>
                     <SelectContent>
@@ -169,13 +193,16 @@ const SearchPage: React.FC = () => {
                       animate={{ opacity: 1, scale: 1 }}
                       exit={{ opacity: 0, scale: 0.8 }}
                       transition={{ duration: 0.2 }}
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
                     >
                       <Button 
                         variant="outline" 
                         onClick={clearFilters}
-                        className="w-full md:w-auto"
+                        className="w-full md:w-auto h-12 border-2"
+                        data-testid="clear-filters-btn"
                       >
-                        <X className="h-4 w-4 mr-2" />
+                        <X className="h-5 w-5 mr-2" />
                         Clear Filters
                       </Button>
                     </motion.div>
@@ -183,9 +210,13 @@ const SearchPage: React.FC = () => {
                 </AnimatePresence>
               </div>
 
+              {/* Tags Filter */}
               {allTags.length > 0 && (
-                <div>
-                  <div className="text-sm font-medium text-foreground mb-2">Filter by Tags:</div>
+                <div className="glass p-6 rounded-2xl border-2 border-border/50">
+                  <div className="flex items-center gap-2 mb-4">
+                    <Sparkles className="h-5 w-5 text-primary" />
+                    <span className="text-sm font-semibold text-foreground">Filter by Tags</span>
+                  </div>
                   <div className="flex flex-wrap gap-2">
                     {allTags.slice(0, 20).map((tag, index) => (
                       <motion.div
@@ -193,13 +224,14 @@ const SearchPage: React.FC = () => {
                         initial={{ opacity: 0, scale: 0.8 }}
                         animate={{ opacity: 1, scale: 1 }}
                         transition={{ delay: index * 0.02, duration: 0.2 }}
-                        whileHover={{ scale: 1.1 }}
+                        whileHover={{ scale: 1.1, y: -2 }}
                         whileTap={{ scale: 0.95 }}
                       >
                         <Badge
                           variant={selectedTags.includes(tag) ? 'default' : 'outline'}
-                          className="cursor-pointer hover:bg-primary/80 transition-colors"
+                          className="cursor-pointer hover:bg-primary/90 transition-all text-sm py-1.5 px-3"
                           onClick={() => toggleTag(tag)}
+                          data-testid={`tag-${tag}`}
                         >
                           {tag}
                         </Badge>
@@ -215,20 +247,22 @@ const SearchPage: React.FC = () => {
 
       <section className="max-w-7xl mx-auto px-4 py-12">
         <FadeInWhenVisible direction="up" duration={0.5}>
-          <div className="mb-6">
-            <h2 className="text-2xl font-bold text-foreground">
-              {loading && tools.length === 0 ? 'Searching...' : `${tools.length} Results`}
-            </h2>
+          <div className="mb-8">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-3xl font-bold text-foreground">
+                {loading && tools.length === 0 ? 'Searching...' : `${tools.length} Results`}
+              </h2>
+            </div>
             <AnimatePresence>
               {selectedTags.length > 0 && (
                 <motion.div 
-                  className="flex flex-wrap gap-2 mt-3"
+                  className="flex flex-wrap gap-2 items-center"
                   initial={{ opacity: 0, height: 0 }}
                   animate={{ opacity: 1, height: 'auto' }}
                   exit={{ opacity: 0, height: 0 }}
                   transition={{ duration: 0.3 }}
                 >
-                  <span className="text-sm text-muted-foreground">Active tags:</span>
+                  <span className="text-sm font-medium text-muted-foreground">Active filters:</span>
                   {selectedTags.map((tag, index) => (
                     <motion.div
                       key={tag}
@@ -241,11 +275,11 @@ const SearchPage: React.FC = () => {
                     >
                       <Badge 
                         variant="default"
-                        className="cursor-pointer"
+                        className="cursor-pointer gap-1 py-1.5 px-3"
                         onClick={() => toggleTag(tag)}
                       >
                         {tag}
-                        <X className="h-3 w-3 ml-1" />
+                        <X className="h-3 w-3" />
                       </Badge>
                     </motion.div>
                   ))}
@@ -263,16 +297,19 @@ const SearchPage: React.FC = () => {
           </div>
         ) : tools.length === 0 ? (
           <FadeInWhenVisible direction="up" duration={0.5}>
-            <div className="text-center py-16">
+            <div className="text-center py-20">
               <motion.div 
-                className="text-6xl mb-4"
-                animate={{ scale: [1, 1.1, 1] }}
+                className="text-7xl mb-6"
+                animate={{ 
+                  scale: [1, 1.1, 1],
+                  rotate: [0, 5, -5, 0]
+                }}
                 transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
               >
                 🔍
               </motion.div>
-              <h3 className="text-xl font-semibold text-foreground mb-2">No tools found</h3>
-              <p className="text-muted-foreground mb-6">
+              <h3 className="text-2xl font-semibold text-foreground mb-3">No tools found</h3>
+              <p className="text-muted-foreground text-lg mb-6">
                 Try adjusting your search terms or filters
               </p>
               {hasActiveFilters && (
@@ -280,7 +317,7 @@ const SearchPage: React.FC = () => {
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                 >
-                  <Button onClick={clearFilters}>
+                  <Button onClick={clearFilters} size="lg">
                     Clear All Filters
                   </Button>
                 </motion.div>
@@ -309,6 +346,8 @@ const SearchPage: React.FC = () => {
                       disabled={loading}
                       size="lg"
                       variant="outline"
+                      className="h-12 px-8 border-2"
+                      data-testid="load-more-btn"
                     >
                       {loading ? 'Loading...' : 'Load More Results'}
                     </Button>
