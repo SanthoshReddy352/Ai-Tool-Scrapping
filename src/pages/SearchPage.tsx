@@ -214,27 +214,46 @@ const SearchPage: React.FC = () => {
       </section>
 
       <section className="max-w-7xl mx-auto px-4 py-12">
-        <div className="mb-6">
-          <h2 className="text-2xl font-bold text-foreground">
-            {loading && tools.length === 0 ? 'Searching...' : `${tools.length} Results`}
-          </h2>
-          {selectedTags.length > 0 && (
-            <div className="flex flex-wrap gap-2 mt-3">
-              <span className="text-sm text-muted-foreground">Active tags:</span>
-              {selectedTags.map((tag) => (
-                <Badge 
-                  key={tag} 
-                  variant="default"
-                  className="cursor-pointer"
-                  onClick={() => toggleTag(tag)}
+        <FadeInWhenVisible direction="up" duration={0.5}>
+          <div className="mb-6">
+            <h2 className="text-2xl font-bold text-foreground">
+              {loading && tools.length === 0 ? 'Searching...' : `${tools.length} Results`}
+            </h2>
+            <AnimatePresence>
+              {selectedTags.length > 0 && (
+                <motion.div 
+                  className="flex flex-wrap gap-2 mt-3"
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  transition={{ duration: 0.3 }}
                 >
-                  {tag}
-                  <X className="h-3 w-3 ml-1" />
-                </Badge>
-              ))}
-            </div>
-          )}
-        </div>
+                  <span className="text-sm text-muted-foreground">Active tags:</span>
+                  {selectedTags.map((tag, index) => (
+                    <motion.div
+                      key={tag}
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: 10 }}
+                      transition={{ delay: index * 0.05, duration: 0.2 }}
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.95 }}
+                    >
+                      <Badge 
+                        variant="default"
+                        className="cursor-pointer"
+                        onClick={() => toggleTag(tag)}
+                      >
+                        {tag}
+                        <X className="h-3 w-3 ml-1" />
+                      </Badge>
+                    </motion.div>
+                  ))}
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        </FadeInWhenVisible>
 
         {loading && tools.length === 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
@@ -243,37 +262,59 @@ const SearchPage: React.FC = () => {
             ))}
           </div>
         ) : tools.length === 0 ? (
-          <div className="text-center py-16">
-            <div className="text-6xl mb-4">🔍</div>
-            <h3 className="text-xl font-semibold text-foreground mb-2">No tools found</h3>
-            <p className="text-muted-foreground mb-6">
-              Try adjusting your search terms or filters
-            </p>
-            {hasActiveFilters && (
-              <Button onClick={clearFilters}>
-                Clear All Filters
-              </Button>
-            )}
-          </div>
+          <FadeInWhenVisible direction="up" duration={0.5}>
+            <div className="text-center py-16">
+              <motion.div 
+                className="text-6xl mb-4"
+                animate={{ scale: [1, 1.1, 1] }}
+                transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+              >
+                🔍
+              </motion.div>
+              <h3 className="text-xl font-semibold text-foreground mb-2">No tools found</h3>
+              <p className="text-muted-foreground mb-6">
+                Try adjusting your search terms or filters
+              </p>
+              {hasActiveFilters && (
+                <motion.div
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <Button onClick={clearFilters}>
+                    Clear All Filters
+                  </Button>
+                </motion.div>
+              )}
+            </div>
+          </FadeInWhenVisible>
         ) : (
           <>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <StaggerContainer className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6" staggerDelay={0.05}>
               {tools.map((tool) => (
-                <ToolCard key={tool.id} tool={tool} />
+                <StaggerItem key={tool.id}>
+                  <ToolCard tool={tool} />
+                </StaggerItem>
               ))}
-            </div>
+            </StaggerContainer>
 
             {hasMore && (
-              <div className="flex justify-center mt-12">
-                <Button
-                  onClick={loadMore}
-                  disabled={loading}
-                  size="lg"
-                  variant="outline"
-                >
-                  {loading ? 'Loading...' : 'Load More Results'}
-                </Button>
-              </div>
+              <FadeInWhenVisible delay={0.2} direction="up">
+                <div className="flex justify-center mt-12">
+                  <motion.div
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    <Button
+                      onClick={loadMore}
+                      disabled={loading}
+                      size="lg"
+                      variant="outline"
+                    >
+                      {loading ? 'Loading...' : 'Load More Results'}
+                    </Button>
+                  </motion.div>
+                </div>
+              </FadeInWhenVisible>
             )}
           </>
         )}
