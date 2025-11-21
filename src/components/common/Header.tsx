@@ -65,7 +65,7 @@ const Header: React.FC = () => {
                 />
               </motion.div>
               <div className="flex flex-col">
-                <span className="text-xl font-bold bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent bg-[length:200%_auto] animate-shimmer">
+                <span className="text-xl font-bold bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">
                   AI Tools Hub
                 </span>
                 <span className="text-[10px] text-muted-foreground -mt-1">Discover & Innovate</span>
