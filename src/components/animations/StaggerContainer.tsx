@@ -50,15 +50,18 @@ export const StaggerItem: React.FC<{ children: React.ReactNode; className?: stri
     show: { 
       opacity: 1, 
       y: 0,
-      transition: {
-        duration: 0.5,
-        ease: 'easeOut',
-      }
     },
   };
 
   return (
-    <motion.div variants={item} className={className}>
+    <motion.div 
+      variants={item} 
+      className={className}
+      transition={{
+        duration: 0.5,
+        ease: 'easeOut',
+      }}
+    >
       {children}
     </motion.div>
   );
