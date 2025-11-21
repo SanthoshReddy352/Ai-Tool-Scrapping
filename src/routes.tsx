@@ -3,6 +3,7 @@ import ToolDetailPage from './pages/ToolDetailPage';
 import CategoriesPage from './pages/CategoriesPage';
 import SearchPage from './pages/SearchPage';
 import AboutPage from './pages/AboutPage';
+import ScrapingLogsPage from './pages/ScrapingLogsPage';
 import type { ReactNode } from 'react';
 
 interface RouteConfig {
@@ -36,6 +37,12 @@ const routes: RouteConfig[] = [
     path: '/about',
     element: <AboutPage />,
     visible: true
+  },
+  {
+    name: 'Logs',
+    path: '/logs',
+    element: <ScrapingLogsPage />,
+    visible: false
   },
   {
     name: 'Tool Detail',
