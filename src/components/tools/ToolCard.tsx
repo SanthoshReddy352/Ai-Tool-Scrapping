@@ -89,18 +89,27 @@ export const ToolCard: React.FC<ToolCardProps> = ({ tool }) => {
           {/* Tags - Pushed to bottom of content area */}
           <div className="mt-auto flex flex-wrap gap-1.5 content-end">
             {tool.tags && tool.tags.length > 0 ? (
-              tool.tags.slice(0, 3).map((tag) => (
-                <span 
+              tool.tags.slice(0, 3).map((tag, index) => (
+                <motion.span 
                   key={tag} 
                   className="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-medium bg-primary/5 text-primary/70 border border-primary/10 group-hover:bg-primary/10 transition-colors"
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 0.3 + index * 0.05, duration: 0.3 }}
+                  whileHover={{ scale: 1.1 }}
                 >
                   #{tag}
-                </span>
+                </motion.span>
               ))
             ) : (
-              <span className="text-[10px] text-muted-foreground italic flex items-center gap-1">
+              <motion.span 
+                className="text-[10px] text-muted-foreground italic flex items-center gap-1"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.3, duration: 0.3 }}
+              >
                 <Sparkles className="h-3 w-3" /> AI Tool
-              </span>
+              </motion.span>
             )}
           </div>
         </CardContent>
