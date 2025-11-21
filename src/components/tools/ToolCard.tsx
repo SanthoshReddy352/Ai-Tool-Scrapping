@@ -165,6 +165,7 @@ export const ToolCard: React.FC<ToolCardProps> = ({ tool }) => {
           </div>
         </CardFooter>
       </Card>
+      </motion.div>
     </Link>
   );
 };
