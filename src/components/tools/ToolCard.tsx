@@ -141,22 +141,27 @@ export const ToolCard: React.FC<ToolCardProps> = ({ tool }) => {
             </motion.div>
 
             {/* External Link Button (Separate click handler) */}
-            <Button 
-              asChild 
-              variant="ghost" 
-              size="icon" 
-              className="h-9 w-9 shrink-0 rounded-lg border border-input bg-transparent hover:bg-accent hover:text-accent-foreground z-20"
+            <motion.div
+              whileHover={{ scale: 1.1, rotate: 5 }}
+              whileTap={{ scale: 0.95 }}
             >
-              <a 
-                href={tool.url} 
-                target="_blank" 
-                rel="noopener noreferrer"
-                onClick={(e) => e.stopPropagation()}
-                title="Visit Website"
+              <Button 
+                asChild 
+                variant="ghost" 
+                size="icon" 
+                className="h-9 w-9 shrink-0 rounded-lg border border-input bg-transparent hover:bg-accent hover:text-accent-foreground z-20"
               >
-                <ExternalLink className="h-4 w-4" />
-              </a>
-            </Button>
+                <a 
+                  href={tool.url} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  onClick={(e) => e.stopPropagation()}
+                  title="Visit Website"
+                >
+                  <ExternalLink className="h-4 w-4" />
+                </a>
+              </Button>
+            </motion.div>
           </div>
         </CardFooter>
       </Card>
