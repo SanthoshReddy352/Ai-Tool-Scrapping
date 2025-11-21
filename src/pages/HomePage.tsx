@@ -95,45 +95,99 @@ const HomePage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <section className="bg-gradient-to-b from-primary/10 to-background py-16 px-4">
-        <div className="max-w-7xl mx-auto text-center">
-          <div className="flex items-center justify-center gap-2 mb-4">
-            <Sparkles className="h-8 w-8 text-primary" />
-            <h1 className="text-4xl md:text-5xl font-bold text-foreground">
-              Discover the Latest AI Tools
-            </h1>
-          </div>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto mb-8">
-            Your centralized platform for tracking and discovering newly released AI tools from across the internet. 
-            Stay ahead with real-time updates on the latest AI innovations.
-          </p>
-          
-          <div className="flex flex-col md:flex-row gap-4 max-w-3xl mx-auto">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-              <Input
-                type="text"
-                placeholder="Search AI tools..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 h-12"
-              />
+      <section className="relative bg-gradient-to-b from-primary/10 to-background py-16 px-4 overflow-hidden">
+        {/* Animated background elements */}
+        <motion.div
+          className="absolute top-20 left-10 w-72 h-72 bg-primary/5 rounded-full blur-3xl"
+          animate={{
+            scale: [1, 1.2, 1],
+            opacity: [0.3, 0.5, 0.3],
+          }}
+          transition={{
+            duration: 8,
+            repeat: Infinity,
+            ease: "easeInOut",
+          }}
+        />
+        <motion.div
+          className="absolute bottom-10 right-10 w-96 h-96 bg-accent/5 rounded-full blur-3xl"
+          animate={{
+            scale: [1.2, 1, 1.2],
+            opacity: [0.2, 0.4, 0.2],
+          }}
+          transition={{
+            duration: 10,
+            repeat: Infinity,
+            ease: "easeInOut",
+          }}
+        />
+        
+        <div className="max-w-7xl mx-auto text-center relative z-10">
+          <FadeInWhenVisible direction="down" duration={0.6}>
+            <div className="flex items-center justify-center gap-2 mb-4">
+              <motion.div
+                animate={{ 
+                  rotate: [0, 10, -10, 0],
+                  scale: [1, 1.1, 1]
+                }}
+                transition={{ 
+                  duration: 4,
+                  repeat: Infinity,
+                  ease: "easeInOut"
+                }}
+              >
+                <Sparkles className="h-8 w-8 text-primary" />
+              </motion.div>
+              <h1 className="text-4xl md:text-5xl font-bold text-foreground">
+                Discover the Latest AI Tools
+              </h1>
             </div>
-            <Select value={selectedCategory} onValueChange={handleCategoryChange}>
-              <SelectTrigger className="w-full md:w-[200px] h-12">
-                <Filter className="h-4 w-4 mr-2" />
-                <SelectValue placeholder="All Categories" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Categories</SelectItem>
-                {categories.map((cat) => (
-                  <SelectItem key={cat.id} value={cat.name}>
-                    {cat.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+          </FadeInWhenVisible>
+          
+          <FadeInWhenVisible delay={0.2} duration={0.6}>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto mb-8">
+              Your centralized platform for tracking and discovering newly released AI tools from across the internet. 
+              Stay ahead with real-time updates on the latest AI innovations.
+            </p>
+          </FadeInWhenVisible>
+          
+          <FadeInWhenVisible delay={0.4} direction="up" duration={0.6}>
+            <div className="flex flex-col md:flex-row gap-4 max-w-3xl mx-auto">
+              <motion.div 
+                className="relative flex-1"
+                whileHover={{ scale: 1.02 }}
+                transition={{ duration: 0.2 }}
+              >
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                <Input
+                  type="text"
+                  placeholder="Search AI tools..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10 h-12 border-border/50 focus:border-primary transition-colors"
+                />
+              </motion.div>
+              <motion.div
+                whileHover={{ scale: 1.02 }}
+                transition={{ duration: 0.2 }}
+              >
+                <Select value={selectedCategory} onValueChange={handleCategoryChange}>
+                  <SelectTrigger className="w-full md:w-[200px] h-12 border-border/50 focus:border-primary transition-colors">
+                    <Filter className="h-4 w-4 mr-2" />
+                    <SelectValue placeholder="All Categories" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Categories</SelectItem>
+                    {categories.map((cat) => (
+                      <SelectItem key={cat.id} value={cat.name}>
+                        {cat.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </motion.div>
+            </div>
+          </FadeInWhenVisible>
         </div>
       </section>
 
