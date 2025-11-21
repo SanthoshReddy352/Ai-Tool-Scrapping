@@ -1,9 +1,10 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { ExternalLink, Calendar } from 'lucide-react';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { ExternalLink, ArrowUpRight, Sparkles } from 'lucide-react';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 import type { AITool } from '@/types/types';
 
 interface ToolCardProps {
@@ -11,88 +12,97 @@ interface ToolCardProps {
 }
 
 export const ToolCard: React.FC<ToolCardProps> = ({ tool }) => {
-  const formatDate = (dateString: string | null) => {
-    if (!dateString) return 'N/A';
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
-  };
-
   return (
-    <Card className="group hover:shadow-md hover:border-primary/50 transition-all duration-300 flex flex-col h-full overflow-hidden bg-card border-muted/60">
-      {/* Compact Header */}
-      <CardHeader className="p-4 pb-2 space-y-0">
-        <div className="flex justify-between items-start gap-2">
-          <CardTitle className="text-2xl font-bold leading-snug line-clamp-1" title={tool.name}>
-            {tool.name}
-          </CardTitle>
-          <Badge variant="outline" className="shrink-0 text-[10px] h-5 px-2 font-normal text-muted-foreground bg-muted/50">
-            {tool.category}
-          </Badge>
-        </div>
-      </CardHeader>
-      
-      <CardContent className="flex-grow p-4 pt-2">
-        <CardDescription className="line-clamp-2 sm min-h-[2.5rem] mb-3 text-muted-foreground/80 leading-relaxed">
-          {tool.description || 'No description available.'}
-        </CardDescription>
+    <Link 
+      to={`/tool/${tool.id}`}
+      className="block h-full w-full outline-none"
+    >
+      <Card className={cn(
+        "group relative flex flex-col aspect-square overflow-hidden rounded-xl border-border/60 bg-gradient-to-br from-card to-card/50",
+        "transition-all duration-300 ease-out",
+        "hover:-translate-y-1 hover:shadow-xl hover:shadow-primary/5 hover:border-primary/50",
+        "focus-visible:ring-2 focus-visible:ring-primary"
+      )}>
         
-        {/* Compact Tags */}
-        <div className="flex flex-wrap gap-1.5">
-          {tool.tags && tool.tags.length > 0 ? (
-            <>
-              {tool.tags.slice(0, 3).map((tag) => (
+        {/* Decorative Gradient Overlay on Hover */}
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+
+        {/* HEADER: Title & Badge */}
+        <CardHeader className="p-5 pb-2 space-y-0 flex-shrink-0 relative z-10">
+          <div className="flex justify-between items-start gap-3">
+            <CardTitle className="text-lg font-bold leading-tight tracking-tight line-clamp-2 group-hover:text-primary transition-colors">
+              {tool.name}
+            </CardTitle>
+            <Badge 
+              variant="secondary" 
+              className="shrink-0 text-[10px] uppercase tracking-wider font-semibold h-6 px-2 bg-secondary/50 text-secondary-foreground group-hover:bg-primary/10 group-hover:text-primary transition-colors"
+            >
+              {tool.category}
+            </Badge>
+          </div>
+        </CardHeader>
+        
+        {/* CONTENT: Description (Shrinks if needed) & Tags */}
+        <CardContent className="flex-grow p-5 pt-3 flex flex-col min-h-0 relative z-10">
+          {/* Description with smart clamping */}
+          <p className="text-sm text-muted-foreground/80 leading-relaxed line-clamp-3 mb-4 group-hover:text-muted-foreground transition-colors">
+            {tool.description || 'No description available for this tool.'}
+          </p>
+          
+          {/* Tags - Pushed to bottom of content area */}
+          <div className="mt-auto flex flex-wrap gap-1.5 content-end">
+            {tool.tags && tool.tags.length > 0 ? (
+              tool.tags.slice(0, 3).map((tag) => (
                 <span 
                   key={tag} 
-                  className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-primary/5 text-primary/70 border border-primary/10"
+                  className="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-medium bg-primary/5 text-primary/70 border border-primary/10 group-hover:bg-primary/10 transition-colors"
                 >
-                  {tag}
+                  #{tag}
                 </span>
-              ))}
-              {tool.tags.length > 3 && (
-                <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-muted text-muted-foreground">
-                  +{tool.tags.length - 3}
-                </span>
-              )}
-            </>
-          ) : (
-             <span className="text-[10px] text-muted-foreground italic">No tags</span>
-          )}
-        </div>
-      </CardContent>
-      
-      {/* Compact Footer */}
-      <CardFooter className="p-4 pt-0 flex flex-col gap-3 mt-auto">
-        <div className="w-full h-px bg-border/40" /> 
-        
-        <div className="flex items-center justify-between text-[10px] text-muted-foreground/70 w-full">
-          <div className="flex items-center gap-1.5">
-            <Calendar className="h-3 w-3" />
-            <span>{formatDate(tool.release_date)}</span>
+              ))
+            ) : (
+              <span className="text-[10px] text-muted-foreground italic flex items-center gap-1">
+                <Sparkles className="h-3 w-3" /> AI Tool
+              </span>
+            )}
           </div>
-          <span className="uppercase tracking-wider font-medium opacity-60">
-            {tool.source}
-          </span>
-        </div>
+        </CardContent>
         
-        <div className="flex gap-2 w-full">
-          <Button asChild variant="secondary" className="flex-1 h-8 text-xs font-medium bg-primary/10 hover:bg-primary/20 text-primary shadow-none" size="sm">
-            <Link to={`/tool/${tool.id}`}>
-              View Details
-            </Link>
-          </Button>
-          <Button asChild variant="ghost" size="sm" className="h-8 w-8 px-0 shrink-0 border border-input hover:bg-accent hover:text-accent-foreground">
-            <a 
-              href={tool.url} 
-              target="_blank" 
-              rel="noopener noreferrer"
-              onClick={(e) => e.stopPropagation()}
-              title="Visit Website"
+        {/* FOOTER: Always Visible Action Bar */}
+        <CardFooter className="p-4 pt-0 flex flex-col gap-3 mt-auto flex-shrink-0 relative z-10">
+          <div className="w-full h-px bg-gradient-to-r from-transparent via-border to-transparent opacity-50" /> 
+          
+          <div className="flex gap-3 w-full items-center">
+            {/* Primary "View" Button (Visual only, since whole card is link) */}
+            <Button 
+              variant="default" 
+              className="flex-1 h-9 shadow-sm bg-primary/90 hover:bg-primary group-hover:translate-x-1 transition-all duration-300"
+              size="sm"
             >
-              <ExternalLink className="h-3.5 w-3.5" />
-            </a>
-          </Button>
-        </div>
-      </CardFooter>
-    </Card>
+              View Details
+              <ArrowUpRight className="h-3.5 w-3.5 ml-2 opacity-70" />
+            </Button>
+
+            {/* External Link Button (Separate click handler) */}
+            <Button 
+              asChild 
+              variant="ghost" 
+              size="icon" 
+              className="h-9 w-9 shrink-0 rounded-lg border border-input bg-transparent hover:bg-accent hover:text-accent-foreground z-20"
+            >
+              <a 
+                href={tool.url} 
+                target="_blank" 
+                rel="noopener noreferrer"
+                onClick={(e) => e.stopPropagation()}
+                title="Visit Website"
+              >
+                <ExternalLink className="h-4 w-4" />
+              </a>
+            </Button>
+          </div>
+        </CardFooter>
+      </Card>
+    </Link>
   );
 };

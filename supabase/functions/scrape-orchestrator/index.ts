@@ -19,9 +19,11 @@ serve(async (req) => {
 
     console.log('Starting scraping orchestrator...');
 
+    // UPDATED: Added 'Hacker News' to the list
     const scrapers = [
       { name: 'ProductHunt', function: 'scrape-producthunt' },
       { name: 'Reddit', function: 'scrape-reddit' },
+      { name: 'Hacker News', function: 'scrape-hackernews' },
       { name: 'RSS Feeds', function: 'scrape-rss' }
     ];
 

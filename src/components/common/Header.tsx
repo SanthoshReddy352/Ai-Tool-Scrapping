@@ -3,6 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import { Search, Menu, X, Sparkles } from "lucide-react";
 import routes from "../../routes";
 import { Button } from "@/components/ui/button";
+import { ModeToggle } from "@/components/mode-toggle";
 
 const Header: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -38,19 +39,23 @@ const Header: React.FC = () => {
                 {item.name}
               </Link>
             ))}
+            <ModeToggle />
           </div>
 
-          <button
-            type="button"
-            className="md:hidden p-2"
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-          >
-            {isMenuOpen ? (
-              <X className="h-6 w-6 text-foreground" />
-            ) : (
-              <Menu className="h-6 w-6 text-foreground" />
-            )}
-          </button>
+          <div className="flex items-center gap-2 md:hidden">
+            <ModeToggle />
+            <button
+              type="button"
+              className="p-2"
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+            >
+              {isMenuOpen ? (
+                <X className="h-6 w-6 text-foreground" />
+              ) : (
+                <Menu className="h-6 w-6 text-foreground" />
+              )}
+            </button>
+          </div>
         </div>
 
         {isMenuOpen && (
