@@ -97,73 +97,119 @@ const SearchPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <section className="bg-gradient-to-b from-primary/10 to-background py-16 px-4">
-        <div className="max-w-7xl mx-auto">
-          <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4 text-center">
-            Search AI Tools
-          </h1>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto text-center mb-8">
-            Find the perfect AI tool for your needs using our advanced search and filtering options.
-          </p>
+      <section className="relative bg-gradient-to-b from-primary/10 to-background py-16 px-4 overflow-hidden">
+        <motion.div
+          className="absolute top-10 left-20 w-80 h-80 bg-accent/5 rounded-full blur-3xl"
+          animate={{
+            scale: [1, 1.2, 1],
+            opacity: [0.2, 0.4, 0.2],
+          }}
+          transition={{
+            duration: 9,
+            repeat: Infinity,
+            ease: "easeInOut",
+          }}
+        />
+        
+        <div className="max-w-7xl mx-auto relative z-10">
+          <FadeInWhenVisible direction="down" duration={0.6}>
+            <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4 text-center">
+              Search AI Tools
+            </h1>
+          </FadeInWhenVisible>
+          <FadeInWhenVisible delay={0.2} duration={0.6}>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto text-center mb-8">
+              Find the perfect AI tool for your needs using our advanced search and filtering options.
+            </p>
+          </FadeInWhenVisible>
 
-          <div className="max-w-3xl mx-auto space-y-4">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-              <Input
-                type="text"
-                placeholder="Search by name or description..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 h-12 text-base"
-              />
-            </div>
+          <FadeInWhenVisible delay={0.3} direction="up" duration={0.6}>
+            <div className="max-w-3xl mx-auto space-y-4">
+              <motion.div 
+                className="relative"
+                whileHover={{ scale: 1.01 }}
+                transition={{ duration: 0.2 }}
+              >
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                <Input
+                  type="text"
+                  placeholder="Search by name or description..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10 h-12 text-base"
+                />
+              </motion.div>
 
-            <div className="flex flex-col md:flex-row gap-4">
-              <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                <SelectTrigger className="w-full md:w-[250px]">
-                  <Filter className="h-4 w-4 mr-2" />
-                  <SelectValue placeholder="All Categories" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Categories</SelectItem>
-                  {categories.map((cat) => (
-                    <SelectItem key={cat.id} value={cat.name}>
-                      {cat.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-
-              {hasActiveFilters && (
-                <Button 
-                  variant="outline" 
-                  onClick={clearFilters}
-                  className="w-full md:w-auto"
+              <div className="flex flex-col md:flex-row gap-4">
+                <motion.div
+                  whileHover={{ scale: 1.01 }}
+                  transition={{ duration: 0.2 }}
+                  className="flex-1"
                 >
-                  <X className="h-4 w-4 mr-2" />
-                  Clear Filters
-                </Button>
+                  <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                    <SelectTrigger className="w-full">
+                      <Filter className="h-4 w-4 mr-2" />
+                      <SelectValue placeholder="All Categories" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Categories</SelectItem>
+                      {categories.map((cat) => (
+                        <SelectItem key={cat.id} value={cat.name}>
+                          {cat.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </motion.div>
+
+                <AnimatePresence>
+                  {hasActiveFilters && (
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.8 }}
+                      transition={{ duration: 0.2 }}
+                    >
+                      <Button 
+                        variant="outline" 
+                        onClick={clearFilters}
+                        className="w-full md:w-auto"
+                      >
+                        <X className="h-4 w-4 mr-2" />
+                        Clear Filters
+                      </Button>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+
+              {allTags.length > 0 && (
+                <div>
+                  <div className="text-sm font-medium text-foreground mb-2">Filter by Tags:</div>
+                  <div className="flex flex-wrap gap-2">
+                    {allTags.slice(0, 20).map((tag, index) => (
+                      <motion.div
+                        key={tag}
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ delay: index * 0.02, duration: 0.2 }}
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.95 }}
+                      >
+                        <Badge
+                          variant={selectedTags.includes(tag) ? 'default' : 'outline'}
+                          className="cursor-pointer hover:bg-primary/80 transition-colors"
+                          onClick={() => toggleTag(tag)}
+                        >
+                          {tag}
+                        </Badge>
+                      </motion.div>
+                    ))}
+                  </div>
+                </div>
               )}
             </div>
-
-            {allTags.length > 0 && (
-              <div>
-                <div className="text-sm font-medium text-foreground mb-2">Filter by Tags:</div>
-                <div className="flex flex-wrap gap-2">
-                  {allTags.slice(0, 20).map((tag) => (
-                    <Badge
-                      key={tag}
-                      variant={selectedTags.includes(tag) ? 'default' : 'outline'}
-                      className="cursor-pointer hover:bg-primary/80 transition-colors"
-                      onClick={() => toggleTag(tag)}
-                    >
-                      {tag}
-                    </Badge>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
+          </FadeInWhenVisible>
         </div>
       </section>
 
