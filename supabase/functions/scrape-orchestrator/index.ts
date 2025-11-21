@@ -90,13 +90,15 @@ serve(async (req) => {
     };
 
     // Log scraping run to database
-    await supabase.from('scraping_logs').insert({
+    const { error: logError } = await supabase.from('scraping_logs').insert({
       run_date: new Date().toISOString(),
       summary,
       details: results
-    }).catch(err => {
-      console.error('Failed to log scraping run:', err);
     });
+
+    if (logError) {
+      console.error('Failed to log scraping run:', logError);
+    }
 
     console.log('Scraping orchestrator completed:', summary);
 

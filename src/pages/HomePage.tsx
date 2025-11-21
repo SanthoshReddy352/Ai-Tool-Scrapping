@@ -42,8 +42,10 @@ const HomePage: React.FC = () => {
     setCategories(data);
   };
 
-  const loadTools = async (reset = false) => {
-    const currentPage = reset ? 0 : page;
+  // UPDATED: Added pageIndex parameter to handle async state updates
+  const loadTools = async (reset = false, pageIndex?: number) => {
+    // Use the passed pageIndex if available, otherwise fall back to state
+    const currentPage = reset ? 0 : (pageIndex ?? page);
     
     if (reset) {
       setLoading(true);
@@ -71,10 +73,11 @@ const HomePage: React.FC = () => {
     setLoadingMore(false);
   };
 
+  // UPDATED: Pass the new page number directly to loadTools
   const loadMore = () => {
     const nextPage = page + 1;
     setPage(nextPage);
-    loadTools(false);
+    loadTools(false, nextPage);
   };
 
   const handleCategoryChange = (value: string) => {

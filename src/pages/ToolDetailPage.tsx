@@ -3,7 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft, ExternalLink, Calendar, Tag, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toolsApi } from '@/db/api';
 import type { AITool } from '@/types/types';
@@ -46,11 +46,16 @@ const ToolDetailPage: React.FC = () => {
           <Skeleton className="h-10 w-32 mb-8 bg-muted" />
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2">
-              <Skeleton className="h-96 w-full mb-6 bg-muted" />
-              <Skeleton className="h-8 w-3/4 mb-4 bg-muted" />
-              <Skeleton className="h-4 w-full mb-2 bg-muted" />
-              <Skeleton className="h-4 w-full mb-2 bg-muted" />
-              <Skeleton className="h-4 w-2/3 bg-muted" />
+              {/* Removed Image Skeleton */}
+              <div className="space-y-4">
+                <div className="flex justify-between">
+                   <Skeleton className="h-12 w-2/3 bg-muted" />
+                   <Skeleton className="h-12 w-32 bg-muted" />
+                </div>
+                <Skeleton className="h-4 w-full bg-muted" />
+                <Skeleton className="h-4 w-full bg-muted" />
+                <Skeleton className="h-4 w-3/4 bg-muted" />
+              </div>
             </div>
             <div>
               <Skeleton className="h-64 w-full bg-muted" />
@@ -93,31 +98,19 @@ const ToolDetailPage: React.FC = () => {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2">
-            <div className="relative w-full h-96 rounded-lg overflow-hidden mb-6 bg-muted">
-              {tool.image_url ? (
-                <img
-                  src={tool.image_url}
-                  alt={tool.name}
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center">
-                  <span className="text-8xl">🤖</span>
-                </div>
-              )}
-            </div>
+            {/* Removed Image Block */}
 
-            <div className="mb-6">
-              <div className="flex items-start justify-between mb-4">
+            <div className="mb-8">
+              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-6">
                 <div>
-                  <h1 className="text-3xl font-bold text-foreground mb-2">
+                  <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-3">
                     {tool.name}
                   </h1>
-                  <Badge variant="secondary" className="text-sm">
+                  <Badge variant="secondary" className="text-sm px-3 py-1">
                     {tool.category}
                   </Badge>
                 </div>
-                <Button asChild size="lg">
+                <Button asChild size="lg" className="shrink-0">
                   <a 
                     href={tool.url} 
                     target="_blank" 
@@ -129,20 +122,22 @@ const ToolDetailPage: React.FC = () => {
                 </Button>
               </div>
 
-              <p className="text-muted-foreground text-lg leading-relaxed">
-                {tool.description || 'No description available for this tool.'}
-              </p>
+              <div className="prose prose-lg dark:prose-invert max-w-none">
+                <p className="text-muted-foreground leading-relaxed whitespace-pre-wrap">
+                  {tool.description || 'No description available for this tool.'}
+                </p>
+              </div>
             </div>
 
             {tool.tags && tool.tags.length > 0 && (
-              <div className="mb-6">
+              <div className="mb-8 pt-6 border-t">
                 <h3 className="text-lg font-semibold text-foreground mb-3 flex items-center gap-2">
                   <Tag className="h-5 w-5" />
                   Tags
                 </h3>
                 <div className="flex flex-wrap gap-2">
                   {tool.tags.map((tag) => (
-                    <Badge key={tag} variant="outline">
+                    <Badge key={tag} variant="outline" className="px-3 py-1 text-sm">
                       {tag}
                     </Badge>
                   ))}
@@ -167,7 +162,7 @@ const ToolDetailPage: React.FC = () => {
                 
                 <div>
                   <div className="text-sm text-muted-foreground mb-1">Source</div>
-                  <div className="text-foreground">{tool.source}</div>
+                  <div className="text-foreground capitalize">{tool.source}</div>
                 </div>
                 
                 <div>
@@ -181,7 +176,7 @@ const ToolDetailPage: React.FC = () => {
                     href={tool.url} 
                     target="_blank" 
                     rel="noopener noreferrer"
-                    className="text-primary hover:underline text-sm break-all"
+                    className="text-primary hover:underline text-sm break-all block"
                   >
                     {tool.url}
                   </a>
@@ -202,9 +197,9 @@ const ToolDetailPage: React.FC = () => {
                     <Link
                       key={relatedTool.id}
                       to={`/tool/${relatedTool.id}`}
-                      className="block p-3 rounded-lg border border-border hover:bg-muted transition-colors"
+                      className="block p-3 rounded-lg border border-border hover:bg-muted transition-colors group"
                     >
-                      <div className="font-medium text-foreground mb-1">
+                      <div className="font-medium text-foreground mb-1 group-hover:text-primary transition-colors">
                         {relatedTool.name}
                       </div>
                       <div className="text-xs text-muted-foreground line-clamp-2">

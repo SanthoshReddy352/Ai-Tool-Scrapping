@@ -39,8 +39,10 @@ const SearchPage: React.FC = () => {
     setAllTags(tagsData);
   };
 
-  const performSearch = async (reset = false) => {
-    const currentPage = reset ? 0 : page;
+  // UPDATED: Added pageIndex parameter to prevent duplicate fetching
+  const performSearch = async (reset = false, pageIndex?: number) => {
+    // Use the passed pageIndex if available, otherwise fall back to state
+    const currentPage = reset ? 0 : (pageIndex ?? page);
     
     setLoading(true);
     
@@ -67,10 +69,11 @@ const SearchPage: React.FC = () => {
     setLoading(false);
   };
 
+  // UPDATED: Calculate next page and pass it explicitly
   const loadMore = () => {
     const nextPage = page + 1;
     setPage(nextPage);
-    performSearch(false);
+    performSearch(false, nextPage);
   };
 
   const toggleTag = (tag: string) => {
