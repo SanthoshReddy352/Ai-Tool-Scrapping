@@ -192,19 +192,28 @@ const HomePage: React.FC = () => {
       </section>
 
       <section className="max-w-7xl mx-auto px-4 py-12">
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center gap-2">
-            <TrendingUp className="h-6 w-6 text-primary" />
-            <h2 className="text-2xl font-bold text-foreground">
-              {selectedCategory !== 'all' ? selectedCategory : 'Latest Tools'}
-            </h2>
+        <FadeInWhenVisible direction="up" duration={0.5}>
+          <div className="flex items-center justify-between mb-8">
+            <div className="flex items-center gap-2">
+              <motion.div
+                animate={{ y: [0, -5, 0] }}
+                transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+              >
+                <TrendingUp className="h-6 w-6 text-primary" />
+              </motion.div>
+              <h2 className="text-2xl font-bold text-foreground">
+                {selectedCategory !== 'all' ? selectedCategory : 'Latest Tools'}
+              </h2>
+            </div>
+            <Link to="/categories">
+              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                <Button variant="outline">
+                  Browse Categories
+                </Button>
+              </motion.div>
+            </Link>
           </div>
-          <Link to="/categories">
-            <Button variant="outline">
-              Browse Categories
-            </Button>
-          </Link>
-        </div>
+        </FadeInWhenVisible>
 
         {loading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
@@ -213,32 +222,59 @@ const HomePage: React.FC = () => {
             ))}
           </div>
         ) : tools.length === 0 ? (
-          <div className="text-center py-16">
-            <div className="text-6xl mb-4">🔍</div>
-            <h3 className="text-xl font-semibold text-foreground mb-2">No tools found</h3>
-            <p className="text-muted-foreground">
-              Try adjusting your search or filter criteria
-            </p>
-          </div>
+          <FadeInWhenVisible direction="up" duration={0.5}>
+            <div className="text-center py-16">
+              <motion.div 
+                className="text-6xl mb-4"
+                animate={{ scale: [1, 1.1, 1] }}
+                transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+              >
+                🔍
+              </motion.div>
+              <h3 className="text-xl font-semibold text-foreground mb-2">No tools found</h3>
+              <p className="text-muted-foreground">
+                Try adjusting your search or filter criteria
+              </p>
+            </div>
+          </FadeInWhenVisible>
         ) : (
           <>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <StaggerContainer className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6" staggerDelay={0.05}>
               {tools.map((tool) => (
-                <ToolCard key={tool.id} tool={tool} />
+                <StaggerItem key={tool.id}>
+                  <ToolCard tool={tool} />
+                </StaggerItem>
               ))}
-            </div>
+            </StaggerContainer>
 
             {hasMore && (
-              <div className="flex justify-center mt-12">
-                <Button
-                  onClick={loadMore}
-                  disabled={loadingMore}
-                  size="lg"
-                  variant="outline"
-                >
-                  {loadingMore ? 'Loading...' : 'Load More Tools'}
-                </Button>
-              </div>
+              <FadeInWhenVisible delay={0.2} direction="up">
+                <div className="flex justify-center mt-12">
+                  <motion.div
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    <Button
+                      onClick={loadMore}
+                      disabled={loadingMore}
+                      size="lg"
+                      variant="outline"
+                      className="relative overflow-hidden"
+                    >
+                      <span className="relative z-10">
+                        {loadingMore ? 'Loading...' : 'Load More Tools'}
+                      </span>
+                      {loadingMore && (
+                        <motion.div
+                          className="absolute inset-0 bg-primary/10"
+                          animate={{ x: ['-100%', '100%'] }}
+                          transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                        />
+                      )}
+                    </Button>
+                  </motion.div>
+                </div>
+              </FadeInWhenVisible>
             )}
           </>
         )}
