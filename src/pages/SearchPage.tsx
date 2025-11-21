@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { Search, Filter, X } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ToolCard } from '@/components/tools/ToolCard';
 import { ToolCardSkeleton } from '@/components/tools/ToolCardSkeleton';
+import { FadeInWhenVisible } from '@/components/animations/FadeInWhenVisible';
+import { StaggerContainer, StaggerItem } from '@/components/animations/StaggerContainer';
 import { toolsApi } from '@/db/api';
 import type { AITool, Category } from '@/types/types';
 import { useDebounce } from '@/hooks/use-debounce';
