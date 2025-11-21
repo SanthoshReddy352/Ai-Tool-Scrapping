@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Search, Menu, X, Sparkles } from "lucide-react";
+import { Search, Menu, X, Sparkles, Zap } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import routes from "../../routes";
 import { Button } from "@/components/ui/button";
@@ -22,9 +22,11 @@ const Header: React.FC = () => {
 
   return (
     <motion.header 
-      className={`bg-card border-b border-border sticky top-0 z-50 backdrop-blur-md transition-all duration-300 ${
-        scrolled ? 'bg-card/95 shadow-lg' : 'bg-card/80'
-      }`}
+      className={`sticky top-0 z-50 transition-all duration-300 ${
+        scrolled 
+          ? 'glass shadow-lg' 
+          : 'bg-card/80 backdrop-blur-sm'
+      } border-b border-border/50`}
       initial={{ y: -100 }}
       animate={{ y: 0 }}
       transition={{ duration: 0.5, ease: 'easeOut' }}
@@ -39,22 +41,35 @@ const Header: React.FC = () => {
           >
             <Link to="/" className="flex items-center gap-2 group">
               <motion.div 
-                className="p-2 bg-primary rounded-lg relative overflow-hidden"
-                whileHover={{ scale: 1.1, rotate: 5 }}
+                className="relative p-2 bg-gradient-to-br from-primary to-accent rounded-xl overflow-hidden"
+                whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.95 }}
                 transition={{ type: 'spring', stiffness: 400 }}
               >
-                <Sparkles className="h-5 w-5 text-primary-foreground relative z-10" />
                 <motion.div
-                  className="absolute inset-0 bg-gradient-to-r from-primary to-accent"
-                  initial={{ x: '-100%' }}
-                  whileHover={{ x: '100%' }}
-                  transition={{ duration: 0.6 }}
+                  className="absolute inset-0 bg-gradient-to-br from-accent to-primary opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                />
+                <Sparkles className="h-5 w-5 text-white relative z-10" />
+                <motion.div
+                  className="absolute top-1/2 left-1/2 w-2 h-2 bg-white rounded-full"
+                  animate={{
+                    scale: [0, 2, 0],
+                    opacity: [0, 1, 0],
+                  }}
+                  transition={{
+                    duration: 2,
+                    repeat: Infinity,
+                    ease: "easeInOut"
+                  }}
+                  style={{ transform: 'translate(-50%, -50%)' }}
                 />
               </motion.div>
-              <span className="text-xl font-bold text-foreground">
-                AI Tools Discovery
-              </span>
+              <div className="flex flex-col">
+                <span className="text-xl font-bold bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent bg-[length:200%_auto] animate-shimmer">
+                  AI Tools Hub
+                </span>
+                <span className="text-[10px] text-muted-foreground -mt-1">Discover & Innovate</span>
+              </div>
             </Link>
           </motion.div>
 
@@ -73,18 +88,23 @@ const Header: React.FC = () => {
               >
                 <Link
                   to={item.path}
-                  className={`px-3 py-2 text-sm font-medium rounded-md transition-all relative group ${
+                  className={`relative px-4 py-2 text-sm font-medium rounded-lg transition-all group ${
                     location.pathname === item.path
-                      ? "text-primary bg-primary/10"
-                      : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                      ? "text-primary"
+                      : "text-muted-foreground hover:text-foreground"
                   }`}
                 >
-                  {item.name}
+                  <span className="relative z-10">{item.name}</span>
                   {location.pathname === item.path && (
                     <motion.div
-                      className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary"
+                      className="absolute inset-0 bg-primary/10 rounded-lg"
                       layoutId="activeNav"
                       transition={{ type: 'spring', stiffness: 380, damping: 30 }}
+                    />
+                  )}
+                  {location.pathname !== item.path && (
+                    <motion.div
+                      className="absolute inset-0 bg-muted/50 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"
                     />
                   )}
                 </Link>
@@ -103,7 +123,7 @@ const Header: React.FC = () => {
             <ModeToggle />
             <motion.button
               type="button"
-              className="p-2"
+              className="p-2 rounded-lg hover:bg-muted transition-colors"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
               whileTap={{ scale: 0.9 }}
             >
@@ -154,7 +174,7 @@ const Header: React.FC = () => {
                   <Link
                     to={item.path}
                     onClick={() => setIsMenuOpen(false)}
-                    className={`block px-3 py-2 text-base font-medium rounded-md transition-colors ${
+                    className={`block px-4 py-3 text-base font-medium rounded-lg transition-colors ${
                       location.pathname === item.path
                         ? "text-primary bg-primary/10"
                         : "text-muted-foreground hover:text-foreground hover:bg-muted"
