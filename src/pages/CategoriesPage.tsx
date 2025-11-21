@@ -4,9 +4,12 @@ import {
   Image, FileText, Code, Video, BarChart, MessageCircle, 
   Zap, Palette, BookOpen, Grid, ChevronRight 
 } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
+import { FadeInWhenVisible } from '@/components/animations/FadeInWhenVisible';
+import { StaggerContainer, StaggerItem } from '@/components/animations/StaggerContainer';
 import { toolsApi } from '@/db/api';
 import type { Category } from '@/types/types';
 
