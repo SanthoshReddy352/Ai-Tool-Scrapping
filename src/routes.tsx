@@ -1,4 +1,8 @@
-import SamplePage from './pages/SamplePage';
+import HomePage from './pages/HomePage';
+import ToolDetailPage from './pages/ToolDetailPage';
+import CategoriesPage from './pages/CategoriesPage';
+import SearchPage from './pages/SearchPage';
+import AboutPage from './pages/AboutPage';
 import type { ReactNode } from 'react';
 
 interface RouteConfig {
@@ -10,9 +14,34 @@ interface RouteConfig {
 
 const routes: RouteConfig[] = [
   {
-    name: 'Sample Page',
+    name: 'Home',
     path: '/',
-    element: <SamplePage />
+    element: <HomePage />,
+    visible: true
+  },
+  {
+    name: 'Categories',
+    path: '/categories',
+    element: <CategoriesPage />,
+    visible: true
+  },
+  {
+    name: 'Search',
+    path: '/search',
+    element: <SearchPage />,
+    visible: true
+  },
+  {
+    name: 'About',
+    path: '/about',
+    element: <AboutPage />,
+    visible: true
+  },
+  {
+    name: 'Tool Detail',
+    path: '/tool/:id',
+    element: <ToolDetailPage />,
+    visible: false
   }
 ];
 
