@@ -1,6 +1,9 @@
 import React from 'react';
-import { Sparkles, Target, Zap, Users, TrendingUp, Globe } from 'lucide-react';
+import { Sparkles, Target, Zap, Users, TrendingUp, Globe, Rocket, Shield, Heart } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { FadeInWhenVisible } from '@/components/animations/FadeInWhenVisible';
+import { StaggerContainer, StaggerItem } from '@/components/animations/StaggerContainer';
 
 const AboutPage: React.FC = () => {
   const features = [
