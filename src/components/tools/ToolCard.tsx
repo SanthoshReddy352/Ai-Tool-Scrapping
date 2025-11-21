@@ -54,15 +54,28 @@ export const ToolCard: React.FC<ToolCardProps> = ({ tool }) => {
         {/* HEADER: Title & Badge */}
         <CardHeader className="p-5 pb-2 space-y-0 flex-shrink-0 relative z-10">
           <div className="flex justify-between items-start gap-3">
-            <CardTitle className="text-lg font-bold leading-tight tracking-tight line-clamp-2 group-hover:text-primary transition-colors">
-              {tool.name}
-            </CardTitle>
-            <Badge 
-              variant="secondary" 
-              className="shrink-0 text-[10px] uppercase tracking-wider font-semibold h-6 px-2 bg-secondary/50 text-secondary-foreground group-hover:bg-primary/10 group-hover:text-primary transition-colors"
+            <motion.div
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.1, duration: 0.3 }}
             >
-              {tool.category}
-            </Badge>
+              <CardTitle className="text-lg font-bold leading-tight tracking-tight line-clamp-2 group-hover:text-primary transition-colors">
+                {tool.name}
+              </CardTitle>
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.2, duration: 0.3 }}
+              whileHover={{ scale: 1.1, rotate: 3 }}
+            >
+              <Badge 
+                variant="secondary" 
+                className="shrink-0 text-[10px] uppercase tracking-wider font-semibold h-6 px-2 bg-secondary/50 text-secondary-foreground group-hover:bg-primary/10 group-hover:text-primary transition-colors"
+              >
+                {tool.category}
+              </Badge>
+            </motion.div>
           </div>
         </CardHeader>
         
