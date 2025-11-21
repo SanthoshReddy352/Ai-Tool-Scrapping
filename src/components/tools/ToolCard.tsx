@@ -120,14 +120,25 @@ export const ToolCard: React.FC<ToolCardProps> = ({ tool }) => {
           
           <div className="flex gap-3 w-full items-center">
             {/* Primary "View" Button (Visual only, since whole card is link) */}
-            <Button 
-              variant="default" 
-              className="flex-1 h-9 shadow-sm bg-primary/90 hover:bg-primary group-hover:translate-x-1 transition-all duration-300"
-              size="sm"
+            <motion.div 
+              className="flex-1"
+              whileHover={{ x: 4 }}
+              transition={{ duration: 0.2 }}
             >
-              View Details
-              <ArrowUpRight className="h-3.5 w-3.5 ml-2 opacity-70" />
-            </Button>
+              <Button 
+                variant="default" 
+                className="w-full h-9 shadow-sm bg-primary/90 hover:bg-primary transition-all duration-300"
+                size="sm"
+              >
+                View Details
+                <motion.div
+                  animate={{ x: [0, 3, 0] }}
+                  transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+                >
+                  <ArrowUpRight className="h-3.5 w-3.5 ml-2 opacity-70" />
+                </motion.div>
+              </Button>
+            </motion.div>
 
             {/* External Link Button (Separate click handler) */}
             <Button 
