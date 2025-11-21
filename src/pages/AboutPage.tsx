@@ -66,17 +66,59 @@ const AboutPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <section className="bg-gradient-to-b from-primary/10 to-background py-16 px-4">
-        <div className="max-w-4xl mx-auto text-center">
-          <div className="flex items-center justify-center gap-2 mb-4">
-            <Sparkles className="h-10 w-10 text-primary" />
-          </div>
-          <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
-            About AI Tools Discovery
-          </h1>
-          <p className="text-lg text-muted-foreground">
-            Your centralized platform for discovering the latest AI innovations
-          </p>
+      {/* Hero Section */}
+      <section className="relative bg-gradient-to-br from-primary/10 via-accent/5 to-background py-20 px-4 overflow-hidden">
+        <motion.div
+          className="absolute top-20 left-20 w-96 h-96 bg-gradient-to-br from-primary/20 to-accent/20 rounded-full blur-3xl"
+          animate={{
+            scale: [1, 1.3, 1],
+            opacity: [0.3, 0.6, 0.3],
+          }}
+          transition={{
+            duration: 8,
+            repeat: Infinity,
+            ease: "easeInOut",
+          }}
+        />
+        <motion.div
+          className="absolute bottom-20 right-20 w-[500px] h-[500px] bg-gradient-to-br from-accent/20 to-primary/20 rounded-full blur-3xl"
+          animate={{
+            scale: [1.2, 1, 1.2],
+            opacity: [0.2, 0.5, 0.2],
+          }}
+          transition={{
+            duration: 10,
+            repeat: Infinity,
+            ease: "easeInOut",
+          }}
+        />
+
+        <div className="max-w-5xl mx-auto text-center relative z-10">
+          <FadeInWhenVisible direction="down" duration={0.6}>
+            <motion.div
+              className="inline-flex items-center justify-center gap-2 mb-6"
+              animate={{ 
+                rotate: [0, 5, -5, 0],
+              }}
+              transition={{ 
+                duration: 4,
+                repeat: Infinity,
+                ease: "easeInOut"
+              }}
+            >
+              <div className="p-4 bg-gradient-to-br from-primary to-accent rounded-2xl">
+                <Sparkles className="h-12 w-12 text-white" />
+              </div>
+            </motion.div>
+            <h1 className="text-5xl md:text-6xl font-bold mb-6">
+              About <span className="gradient-text">AI Tools Hub</span>
+            </h1>
+          </FadeInWhenVisible>
+          <FadeInWhenVisible delay={0.2} duration={0.6}>
+            <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto">
+              Your centralized platform for discovering the latest AI innovations
+            </p>
+          </FadeInWhenVisible>
         </div>
       </section>
 
