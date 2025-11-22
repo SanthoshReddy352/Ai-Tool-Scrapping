@@ -193,9 +193,9 @@ const ToolDetailPage: React.FC = () => {
             
             {/* Scroll Area spans full container width now */}
             <ScrollArea className="w-full whitespace-nowrap pb-4">
-              <div className="flex w-max space-x-4 p-1 pb-4">
+              <div className="flex w-max space-x-6 p-1 pb-4">
                 {relatedTools.map((relatedTool) => (
-                  <div key={relatedTool.id} className="w-[280px] md:w-[300px] h-[380px]">
+                  <div key={relatedTool.id} className="w-[320px]" style={{ aspectRatio: '1 / 1' }}>
                     <ToolCard tool={relatedTool} />
                   </div>
                 ))}
