@@ -19,7 +19,10 @@ serve(async (req) => {
 
     // Search for AI repos created in the last 48 hours
     const twoDaysAgo = new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString().split('T')[0];
-    const query = `topic:ai created:>${twoDaysAgo} stars:>20`; // Higher star threshold
+    
+    // FIXED: Removed "stars:>20" filter. 
+    // New repos rarely get 20 stars in 48h. We rely on "sort=stars" to get the best ones.
+    const query = `topic:ai created:>${twoDaysAgo}`; 
     const url = `https://api.github.com/search/repositories?q=${encodeURIComponent(query)}&sort=stars&order=desc&per_page=10`;
 
     const response = await fetch(url, { headers });

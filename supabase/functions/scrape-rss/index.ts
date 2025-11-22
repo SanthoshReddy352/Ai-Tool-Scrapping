@@ -33,7 +33,8 @@ serve(async (req) => {
     // RSS feeds to monitor
     const feeds: RSSFeed[] = [
       { name: 'TechCrunch AI', url: 'https://techcrunch.com/category/artificial-intelligence/feed/' },
-      { name: 'The Verge AI', url: 'https://www.theverge.com/ai-artificial-intelligence/rss/index.xml' },
+      // FIXED: Updated to main feed as the specific AI feed often returns 404
+      { name: 'The Verge', url: 'https://www.theverge.com/rss/index.xml' },
       { name: 'VentureBeat AI', url: 'https://venturebeat.com/category/ai/feed/' }
     ];
 
@@ -44,7 +45,7 @@ serve(async (req) => {
 
         for (const item of items) {
           try {
-            // 1. Heuristic Filter: Check if it looks like a tool launch to save LLM tokens
+            // 1. Heuristic Filter: Check if it looks like a tool launch
             if (!isToolLaunch(item)) {
               continue;
             }
@@ -55,15 +56,14 @@ serve(async (req) => {
               continue;
             }
 
-            // 3. LLM Parsing: Use Gemini to get clean data
+            // 3. LLM Parsing
             const llmResult = await parseWithLLM(item.title, item.description);
 
-            // If LLM says it's not a tool (double-check), skip it
             if (!llmResult.is_tool) {
               continue;
             }
 
-            const name = llmResult.name || item.title; // Fallback to title
+            const name = llmResult.name || item.title; 
             const description = llmResult.description || item.description;
             const category = llmResult.category || 'Other';
             const tags = llmResult.tags || [];
@@ -193,7 +193,6 @@ async function extractToolUrlFromArticle(articleUrl: string): Promise<string | n
     const matches = html.match(urlRegex);
 
     if (matches && matches.length > 0) {
-       // Return the first valid external link
        return matches[0]; 
     }
     return null;
