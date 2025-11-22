@@ -125,7 +125,7 @@ serve(async (req) => {
 async function fetchProductHuntPosts(token: string): Promise<ProductHuntPost[]> {
   const query = `
     query {
-      posts(first: 200, order: NEWEST) {
+      posts(first: 10, order: NEWEST) {
         edges {
           node {
             id

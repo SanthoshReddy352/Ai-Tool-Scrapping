@@ -21,7 +21,6 @@ serve(async (req) => {
 
     const scrapers = [
       { name: 'ProductHunt', function: 'scrape-producthunt' },
-      { name: 'Reddit', function: 'scrape-reddit' },
       { name: 'Hacker News', function: 'scrape-hackernews' },
       { name: 'GitHub', function: 'scrape-github' },
       { name: 'YouTube', function: 'scrape-youtube' },
