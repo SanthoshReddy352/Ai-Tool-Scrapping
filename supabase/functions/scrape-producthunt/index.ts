@@ -1,8 +1,8 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'npm:@supabase/supabase-js@2';
 import { isDuplicate, normalizeUrl } from '../utils/deduplication.ts';
-import { categorizeToolAuto, extractTags, cleanDescription } from '../utils/categorization.ts';
 import { retryWithBackoff } from '../utils/retry.ts';
+import { parseWithLLM } from '../utils/llm.ts';
 
 interface ProductHuntPost {
   id: string;
@@ -48,16 +48,17 @@ serve(async (req) => {
 
     for (const post of posts) {
       try {
-        // Check if it's AI-related
+        // 1. Initial Heuristic Check (to save tokens if obviously not AI)
         if (!isAIRelated(post)) {
           continue;
         }
 
-        // Check for duplicates
+        // 2. Deduplication Check
+        // We use the raw name/url first to avoid LLM cost on duplicates
         const duplicate = await isDuplicate(supabase, {
           name: post.name,
           url: normalizeUrl(post.url),
-          description: post.description
+          description: post.description || post.tagline
         });
 
         if (duplicate) {
@@ -65,26 +66,32 @@ serve(async (req) => {
           continue;
         }
 
-        // Categorize and extract tags
-        const category = categorizeToolAuto(post.name, post.description);
-        const tags = extractTags(post.name, post.description);
+        // 3. LLM Parsing
+        const llmResult = await parseWithLLM(
+          post.name, 
+          `${post.tagline}\n\n${post.description}`
+        );
+        
+        if (!llmResult.is_tool) {
+          continue;
+        }
 
-        // Add ProductHunt topics as tags
+        const tags = new Set(llmResult.tags || []);
+        
+        // Add ProductHunt topics as extra tags
         if (post.topics?.edges) {
           post.topics.edges.forEach(edge => {
-            if (edge.node.name && tags.length < 8) {
-              tags.push(edge.node.name.toLowerCase());
-            }
+            if (edge.node.name) tags.add(edge.node.name.toLowerCase());
           });
         }
 
-        // Insert into database
+        // 4. Insert into database
         const { error } = await supabase.from('ai_tools').insert({
-          name: post.name,
-          description: cleanDescription(post.description || post.tagline),
+          name: llmResult.name || post.name,
+          description: llmResult.description || post.tagline,
           url: normalizeUrl(post.url),
-          category,
-          tags: Array.from(new Set(tags)),
+          category: llmResult.category || 'Other',
+          tags: Array.from(tags).slice(0, 8), // Limit tags
           image_url: post.thumbnail?.url || null,
           release_date: new Date(post.createdAt).toISOString().split('T')[0],
           source: 'ProductHunt'
@@ -166,7 +173,7 @@ function isAIRelated(post: ProductHuntPost): boolean {
   const aiKeywords = [
     'ai', 'artificial intelligence', 'machine learning', 'ml',
     'deep learning', 'neural', 'gpt', 'llm', 'chatbot',
-    'automation', 'intelligent', 'smart', 'cognitive'
+    'automation', 'intelligent', 'smart', 'cognitive', 'copilot', 'agent'
   ];
 
   return aiKeywords.some(keyword => text.includes(keyword));

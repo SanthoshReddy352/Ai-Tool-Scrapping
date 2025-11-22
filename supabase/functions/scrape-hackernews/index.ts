@@ -1,7 +1,7 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 import { isDuplicate, normalizeUrl } from '../utils/deduplication.ts';
-import { categorizeToolAuto, extractTags, cleanDescription } from '../utils/categorization.ts';
+import { parseWithLLM } from '../utils/llm.ts';
 
 interface HNItem {
   id: number;
@@ -35,9 +35,7 @@ serve(async (req) => {
     if (!response.ok) throw new Error('Failed to fetch Show HN stories');
     
     const storyIds: number[] = await response.json();
-    
-    // Limit to top 30
-    const recentStoryIds = storyIds.slice(0, 30);
+    const recentStoryIds = storyIds.slice(0, 20); // Limit to top 20
     results.total = recentStoryIds.length;
 
     for (const id of recentStoryIds) {
@@ -46,18 +44,16 @@ serve(async (req) => {
         if (!itemResponse.ok) continue;
         
         const item: HNItem = await itemResponse.json();
+        if (!item.url || item.type !== 'story') continue;
 
-        if (!item.url || item.type !== 'story') {
-          continue;
-        }
+        const rawTitle = item.title;
+        const rawDescription = item.text || `${item.title} (via Hacker News)`;
 
-        const toolName = cleanHNTitle(item.title);
-        const description = item.text || `${item.title} (via Hacker News)`;
-
+        // Deduplication Check
         const duplicate = await isDuplicate(supabase, {
-          name: toolName,
+          name: rawTitle,
           url: normalizeUrl(item.url),
-          description: description
+          description: rawDescription
         });
 
         if (duplicate) {
@@ -65,16 +61,21 @@ serve(async (req) => {
           continue;
         }
 
-        const category = categorizeToolAuto(toolName, description);
-        const tags = extractTags(toolName, description);
-        tags.push('show hn', 'hacker news');
+        // LLM Parsing
+        const llmResult = await parseWithLLM(rawTitle, rawDescription);
+
+        if (!llmResult.is_tool) continue;
+
+        const tags = new Set(llmResult.tags || []);
+        tags.add('show hn');
+        tags.add('hacker news');
 
         const { error } = await supabase.from('ai_tools').insert({
-          name: toolName,
-          description: cleanDescription(description),
+          name: llmResult.name || cleanHNTitle(rawTitle),
+          description: llmResult.description || rawDescription,
           url: normalizeUrl(item.url),
-          category,
-          tags: Array.from(new Set(tags)),
+          category: llmResult.category || 'Other',
+          tags: Array.from(tags),
           image_url: null,
           release_date: new Date(item.time * 1000).toISOString().split('T')[0],
           source: 'Hacker News'
@@ -82,7 +83,7 @@ serve(async (req) => {
 
         if (error) {
           results.errors++;
-          results.errors_detail.push(`${toolName}: ${error.message}`);
+          results.errors_detail.push(`${llmResult.name}: ${error.message}`);
         } else {
           results.added++;
         }

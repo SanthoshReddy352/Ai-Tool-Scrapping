@@ -1,7 +1,7 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'npm:@supabase/supabase-js@2';
 import { isDuplicate, normalizeUrl } from '../utils/deduplication.ts';
-import { categorizeToolAuto } from '../utils/categorization.ts';
+import { parseWithLLM } from '../utils/llm.ts';
 
 serve(async (req) => {
   try {
@@ -19,8 +19,8 @@ serve(async (req) => {
 
     // Search for AI repos created in the last 48 hours
     const twoDaysAgo = new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString().split('T')[0];
-    const query = `topic:ai created:>${twoDaysAgo} stars:>10`; // Minimum 10 stars to filter noise
-    const url = `https://api.github.com/search/repositories?q=${encodeURIComponent(query)}&sort=stars&order=desc&per_page=20`;
+    const query = `topic:ai created:>${twoDaysAgo} stars:>20`; // Higher star threshold
+    const url = `https://api.github.com/search/repositories?q=${encodeURIComponent(query)}&sort=stars&order=desc&per_page=10`;
 
     const response = await fetch(url, { headers });
     if (!response.ok) throw new Error(`GitHub API error: ${response.status}`);
@@ -30,25 +30,33 @@ serve(async (req) => {
 
     for (const repo of data.items) {
       try {
-        const toolName = repo.name;
-        const description = repo.description || `GitHub repository for ${toolName}`;
         const toolUrl = repo.html_url;
-
-        if (await isDuplicate(supabase, { name: toolName, url: normalizeUrl(toolUrl), description })) {
+        
+        // Deduplication check before LLM
+        if (await isDuplicate(supabase, { name: repo.name, url: normalizeUrl(toolUrl), description: repo.description })) {
           results.duplicates++;
           continue;
         }
 
-        const category = categorizeToolAuto(toolName, description);
-        // Combine GitHub topics with our standard tags
-        const tags = [...(repo.topics || []).slice(0, 5), 'github', 'open-source'];
+        // LLM Parsing
+        const llmResult = await parseWithLLM(
+          repo.name,
+          `${repo.description || ''} \n\n Topics: ${(repo.topics || []).join(', ')}`
+        );
+
+        if (!llmResult.is_tool) continue;
+
+        const tags = new Set(llmResult.tags || []);
+        tags.add('github');
+        tags.add('open-source');
+        if (repo.topics) repo.topics.forEach((t: string) => tags.add(t));
 
         const { error } = await supabase.from('ai_tools').insert({
-          name: toolName,
-          description: description,
+          name: llmResult.name || repo.name,
+          description: llmResult.description || repo.description,
           url: normalizeUrl(toolUrl),
-          category,
-          tags: Array.from(new Set(tags)),
+          category: llmResult.category || 'Code & Development',
+          tags: Array.from(tags).slice(0, 8),
           release_date: repo.created_at.split('T')[0],
           source: 'GitHub'
         });

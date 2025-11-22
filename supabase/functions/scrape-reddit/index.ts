@@ -1,8 +1,8 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'npm:@supabase/supabase-js@2';
 import { isDuplicate, normalizeUrl } from '../utils/deduplication.ts';
-import { categorizeToolAuto, extractTags, cleanDescription } from '../utils/categorization.ts';
 import { retryWithBackoff } from '../utils/retry.ts';
+import { parseWithLLM } from '../utils/llm.ts';
 
 interface RedditPost {
   data: {
@@ -33,7 +33,7 @@ serve(async (req) => {
     };
 
     // Subreddits to monitor
-    const subreddits = ['artificial', 'MachineLearning', 'ArtificialIntelligence'];
+    const subreddits = ['artificial', 'MachineLearning', 'ArtificialIntelligence', 'OpenAI', 'LocalLLaMA'];
 
     for (const subreddit of subreddits) {
       try {
@@ -58,12 +58,12 @@ serve(async (req) => {
               continue;
             }
 
-            // Check if it's a tool announcement
+            // Heuristic check first
             if (!isToolAnnouncement(post.data)) {
               continue;
             }
 
-            // Check for duplicates
+            // Deduplication check
             const duplicate = await isDuplicate(supabase, {
               name: post.data.title,
               url: normalizeUrl(toolUrl),
@@ -75,20 +75,26 @@ serve(async (req) => {
               continue;
             }
 
-            // Categorize and extract tags
-            const category = categorizeToolAuto(post.data.title, post.data.selftext);
-            const tags = extractTags(post.data.title, post.data.selftext);
+            // LLM Parsing
+            const llmResult = await parseWithLLM(
+                post.data.title, 
+                post.data.selftext || post.data.title
+            );
 
-            // Add subreddit as context
-            tags.push(post.data.subreddit.toLowerCase());
+            if (!llmResult.is_tool) {
+                continue;
+            }
+
+            const tags = new Set(llmResult.tags || []);
+            tags.add(post.data.subreddit.toLowerCase());
 
             // Insert into database
             const { error } = await supabase.from('ai_tools').insert({
-              name: extractToolName(post.data.title),
-              description: cleanDescription(post.data.selftext || post.data.title),
+              name: llmResult.name || post.data.title,
+              description: llmResult.description || post.data.selftext,
               url: normalizeUrl(toolUrl),
-              category,
-              tags: Array.from(new Set(tags)),
+              category: llmResult.category || 'Other',
+              tags: Array.from(tags),
               image_url: null,
               release_date: new Date(post.data.created_utc * 1000).toISOString().split('T')[0],
               source: `Reddit r/${post.data.subreddit}`
@@ -182,24 +188,18 @@ async function fetchRedditPostsPublic(subreddit: string): Promise<RedditPost[]> 
 }
 
 function extractToolUrl(post: any): string | null {
-  // Check if URL is external (not reddit.com)
   if (post.url && !post.url.includes('reddit.com')) {
     return post.url;
   }
-
-  // Try to extract URL from selftext
   const urlRegex = /(https?:\/\/[^\s]+)/g;
   const matches = post.selftext?.match(urlRegex);
-  
   if (matches && matches.length > 0) {
-    // Return first non-reddit URL
     for (const url of matches) {
       if (!url.includes('reddit.com')) {
         return url;
       }
     }
   }
-
   return null;
 }
 
@@ -211,34 +211,14 @@ function isToolAnnouncement(post: any): boolean {
     'launch', 'released', 'introducing', 'new tool', 'built',
     'created', 'made', 'check out', 'announcement', 'available'
   ];
-
-  const excludeKeywords = [
-    'question', 'help', 'discussion', 'opinion', 'what do you think'
-  ];
+  const excludeKeywords = ['question', 'help', 'discussion', 'opinion', 'what do you think'];
 
   const hasAnnouncement = announcementKeywords.some(keyword => 
     title.includes(keyword) || text.includes(keyword)
   );
-
   const hasExclude = excludeKeywords.some(keyword => 
     title.includes(keyword)
   );
 
   return hasAnnouncement && !hasExclude;
-}
-
-function extractToolName(title: string): string {
-  // Remove common prefixes
-  let name = title
-    .replace(/^\[.*?\]\s*/g, '')
-    .replace(/^(Introducing|Launched|Released|New|Check out)\s+/gi, '')
-    .trim();
-
-  // Take first part before dash or colon
-  const parts = name.split(/[-–—:]/);
-  if (parts.length > 0) {
-    name = parts[0].trim();
-  }
-
-  return name;
 }

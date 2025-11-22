@@ -1,5 +1,5 @@
 import { GoogleGenerativeAI } from 'npm:@google/generative-ai';
-import { cleanDescription, categorizeToolAuto, extractTags } from './categorization.ts';
+import { cleanDescription, categorizeToolAuto, extractTags, CATEGORIES } from './categorization.ts';
 
 export interface LLMResult {
   is_tool: boolean;
@@ -29,24 +29,38 @@ export async function parseWithLLM(title: string, content: string): Promise<LLMR
   try {
     const genAI = new GoogleGenerativeAI(apiKey);
     const model = genAI.getGenerativeModel({ 
-      model: 'gemini-2.5-flash-lite',
+      model: 'gemini-1.5-flash', 
       generationConfig: { 
         responseMimeType: "application/json",
-        temperature: 0.3
+        temperature: 0.1 // Low temperature for factual extraction
       }
     });
 
     const prompt = `
-      You are an AI Tools extractor. Analyze the text provided. 
-      1. Determine if it describes a specific software tool, library, or AI model.
-      2. If yes, extract the Name, a Summary (max 2 sentences), Category, and 3-5 Tags.
-      3. Return strictly valid JSON.
+      You are an expert AI Software Analyst. Analyze the following text to identify if it describes a software tool.
 
       Title: ${title}
-      Content: ${content}
+      Content Snippet: ${content.substring(0, 2500)}
 
-      JSON Schema:
-      { "is_tool": boolean, "name": string, "description": string, "category": string, "tags": string[] }
+      Instructions:
+      1. **Identify**: Does this text describe a specific AI tool, library, or software? (Set "is_tool" to true/false).
+      2. **Name**: Extract the *clean, official product name*. 
+         - **CRITICAL**: Keep it concise (max 5-6 words). 
+         - Remove slogans, taglines, or decorative text (e.g., "SuperTool - The best AI..." -> "SuperTool").
+      3. **Description**: Write a professional, objective summary (2-3 sentences) of what the tool DOES.
+         - STRICTLY IGNORE promotional fluff (e.g., "Subscribe", "Smash like", "In this video", "I will show you").
+         - Focus on features, use cases, and technical capabilities.
+      4. **Category**: Assign the best matching category from this list: [${CATEGORIES.join(', ')}]. If none fit perfectly, choose "Other".
+      5. **Tags**: Extract 3-5 relevant technical tags (e.g., "LLM", "Video Editing", "Open Source").
+
+      Return strictly valid JSON matching this schema:
+      { 
+        "is_tool": boolean, 
+        "name": string, 
+        "description": string, 
+        "category": string, 
+        "tags": string[] 
+      }
     `;
 
     const result = await model.generateContent(prompt);
@@ -55,7 +69,7 @@ export async function parseWithLLM(title: string, content: string): Promise<LLMR
     
     return JSON.parse(text);
   } catch (error) {
-    console.error('Gemini 2.5 Flash Lite parsing failed, falling back to heuristics:', error);
+    console.error('Gemini parsing failed, falling back to heuristics:', error);
     // Fallback
     return {
       is_tool: checkForToolKeywords(title + ' ' + content),
