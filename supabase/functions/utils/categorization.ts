@@ -41,11 +41,13 @@ const categoryKeywords: CategoryKeywords = {
   ]
 };
 
+// 👇 THIS IS THE MISSING LINE 👇
+export const CATEGORIES = Object.keys(categoryKeywords);
+
 export function categorizeToolAuto(name: string, description: string): string {
   const text = `${name} ${description}`.toLowerCase();
   const scores: { [key: string]: number } = {};
 
-  // Calculate score for each category
   for (const [category, keywords] of Object.entries(categoryKeywords)) {
     let score = 0;
     for (const keyword of keywords) {
@@ -56,7 +58,6 @@ export function categorizeToolAuto(name: string, description: string): string {
     scores[category] = score;
   }
 
-  // Find category with highest score
   let maxScore = 0;
   let bestCategory = 'Other';
 
@@ -88,18 +89,13 @@ export function extractTags(name: string, description: string): string[] {
     }
   }
 
-  // Limit to 5 most relevant tags
   return Array.from(tags).slice(0, 5);
 }
 
 export function cleanDescription(description: string): string {
-  // Remove excessive whitespace
   let cleaned = description.replace(/\s+/g, ' ').trim();
-  
-  // Limit length to 500 characters
   if (cleaned.length > 500) {
     cleaned = cleaned.substring(0, 497) + '...';
   }
-  
   return cleaned;
 }
