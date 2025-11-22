@@ -364,7 +364,7 @@ const HomePage: React.FC = () => {
           </FadeInWhenVisible>
         ) : (
           <>
-            <StaggerContainer className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6" staggerDelay={0.05}>
+            <StaggerContainer className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" staggerDelay={0.05}>
               {tools.map((tool) => (
                 <StaggerItem key={tool.id}>
                   <ToolCard tool={tool} />
