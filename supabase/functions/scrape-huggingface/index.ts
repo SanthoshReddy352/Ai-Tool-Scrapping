@@ -22,7 +22,7 @@ serve(async (req) => {
     );
 
     // Fetch trending Spaces
-    const response = await fetch('https://huggingface.co/api/spaces?sort=likes&direction=-1&limit=30&full=true');
+    const response = await fetch('https://huggingface.co/api/spaces?sort=likes&direction=-1&limit=200&full=true');
     if (!response.ok) throw new Error('Failed to fetch HF Spaces');
     
     const spaces: HFSpace[] = await response.json();

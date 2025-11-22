@@ -152,7 +152,7 @@ async function getRedditAccessToken(clientId: string, clientSecret: string): Pro
 
 async function fetchRedditPosts(subreddit: string, accessToken: string): Promise<RedditPost[]> {
   const response = await fetch(
-    `https://oauth.reddit.com/r/${subreddit}/new?limit=25`,
+    `https://oauth.reddit.com/r/${subreddit}/new?limit=200`,
     {
       headers: {
         'Authorization': `Bearer ${accessToken}`,

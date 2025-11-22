@@ -23,7 +23,7 @@ serve(async (req) => {
     // FIXED: Removed "stars:>20" filter. 
     // New repos rarely get 20 stars in 48h. We rely on "sort=stars" to get the best ones.
     const query = `topic:ai created:>${twoDaysAgo}`; 
-    const url = `https://api.github.com/search/repositories?q=${encodeURIComponent(query)}&sort=stars&order=desc&per_page=10`;
+    const url = `https://api.github.com/search/repositories?q=${encodeURIComponent(query)}&sort=stars&order=desc&per_page=250`;
 
     const response = await fetch(url, { headers });
     if (!response.ok) throw new Error(`GitHub API error: ${response.status}`);

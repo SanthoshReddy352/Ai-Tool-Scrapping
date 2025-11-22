@@ -35,7 +35,7 @@ serve(async (req) => {
     if (!response.ok) throw new Error('Failed to fetch Show HN stories');
     
     const storyIds: number[] = await response.json();
-    const recentStoryIds = storyIds.slice(0, 20); // Limit to top 20
+    const recentStoryIds = storyIds.slice(0, 200); // Limit to top 20
     results.total = recentStoryIds.length;
 
     for (const id of recentStoryIds) {

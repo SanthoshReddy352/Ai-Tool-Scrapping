@@ -15,7 +15,7 @@ serve(async (req) => {
     // Search for recent videos about new AI tools
     const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
     const query = 'new ai tool review';
-    const searchUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(query)}&type=video&order=date&publishedAfter=${oneDayAgo}&key=${apiKey}&maxResults=10`;
+    const searchUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(query)}&type=video&order=date&publishedAfter=${oneDayAgo}&key=${apiKey}&maxResults=200`;
 
     const response = await fetch(searchUrl);
     const data = await response.json();

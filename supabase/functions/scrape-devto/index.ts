@@ -94,7 +94,7 @@ serve(async (req) => {
 
 async function fetchDevToArticles(): Promise<DevToArticle[]> {
   // Fetch articles tagged 'ai' or 'machinelearning'
-  const response = await fetch('https://dev.to/api/articles?tag=ai&state=fresh&per_page=30');
+  const response = await fetch('https://dev.to/api/articles?tag=ai&state=fresh&per_page=200');
   if (!response.ok) throw new Error(`Dev.to API error: ${response.status}`);
   return await response.json();
 }
