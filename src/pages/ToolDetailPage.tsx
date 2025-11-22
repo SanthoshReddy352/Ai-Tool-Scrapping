@@ -5,8 +5,10 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { toolsApi } from '@/db/api';
 import type { AITool } from '@/types/types';
+import { ToolCard } from '@/components/tools/ToolCard';
 
 const ToolDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -17,19 +19,24 @@ const ToolDetailPage: React.FC = () => {
   useEffect(() => {
     if (id) {
       loadTool(id);
+      window.scrollTo(0, 0);
     }
   }, [id]);
 
   const loadTool = async (toolId: string) => {
     setLoading(true);
-    const data = await toolsApi.getToolById(toolId);
-    setTool(data);
-    
-    if (data) {
-      const related = await toolsApi.getToolsByCategory(data.category, 0);
-      setRelatedTools(related.filter(t => t.id !== toolId).slice(0, 3));
+    try {
+      const data = await toolsApi.getToolById(toolId);
+      setTool(data);
+      
+      if (data) {
+        const related = await toolsApi.getToolsByCategory(data.category, 0);
+        // Fetch enough items to fill the wider horizontal space
+        setRelatedTools(related.filter(t => t.id !== toolId).slice(0, 8));
+      }
+    } catch (error) {
+      console.error("Failed to load tool details:", error);
     }
-    
     setLoading(false);
   };
 
@@ -46,16 +53,8 @@ const ToolDetailPage: React.FC = () => {
           <Skeleton className="h-10 w-32 mb-8 bg-muted" />
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2">
-              {/* Removed Image Skeleton */}
-              <div className="space-y-4">
-                <div className="flex justify-between">
-                   <Skeleton className="h-12 w-2/3 bg-muted" />
-                   <Skeleton className="h-12 w-32 bg-muted" />
-                </div>
-                <Skeleton className="h-4 w-full bg-muted" />
-                <Skeleton className="h-4 w-full bg-muted" />
-                <Skeleton className="h-4 w-3/4 bg-muted" />
-              </div>
+              <Skeleton className="h-12 w-2/3 mb-4 bg-muted" />
+              <Skeleton className="h-64 w-full bg-muted" />
             </div>
             <div>
               <Skeleton className="h-64 w-full bg-muted" />
@@ -70,16 +69,9 @@ const ToolDetailPage: React.FC = () => {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
-          <div className="text-6xl mb-4">😕</div>
           <h2 className="text-2xl font-bold text-foreground mb-2">Tool Not Found</h2>
-          <p className="text-muted-foreground mb-6">
-            The tool you're looking for doesn't exist or has been removed.
-          </p>
           <Button asChild>
-            <Link to="/">
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Home
-            </Link>
+            <Link to="/">Back to Home</Link>
           </Button>
         </div>
       </div>
@@ -88,7 +80,9 @@ const ToolDetailPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="max-w-5xl mx-auto px-4 py-8">
+      <div className="max-w-6xl mx-auto px-4 py-8"> {/* Increased max-width slightly for better layout */}
+        
+        {/* Back Button */}
         <Button asChild variant="ghost" className="mb-8">
           <Link to="/">
             <ArrowLeft className="h-4 w-4 mr-2" />
@@ -96,10 +90,11 @@ const ToolDetailPage: React.FC = () => {
           </Link>
         </Button>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Top Section: Split between Main Info and Sidebar */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-16">
+          
+          {/* Left Column: Main Description & Tags */}
           <div className="lg:col-span-2">
-            {/* Removed Image Block */}
-
             <div className="mb-8">
               <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-6">
                 <div>
@@ -129,8 +124,9 @@ const ToolDetailPage: React.FC = () => {
               </div>
             </div>
 
+            {/* Tags Section */}
             {tool.tags && tool.tags.length > 0 && (
-              <div className="mb-8 pt-6 border-t">
+              <div className="pt-6 border-t">
                 <h3 className="text-lg font-semibold text-foreground mb-3 flex items-center gap-2">
                   <Tag className="h-5 w-5" />
                   Tags
@@ -146,6 +142,7 @@ const ToolDetailPage: React.FC = () => {
             )}
           </div>
 
+          {/* Right Column: Sidebar Info */}
           <div className="space-y-6">
             <Card>
               <CardHeader>
@@ -183,35 +180,31 @@ const ToolDetailPage: React.FC = () => {
                 </div>
               </CardContent>
             </Card>
-
-            {relatedTools.length > 0 && (
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg flex items-center gap-2">
-                    <Sparkles className="h-5 w-5" />
-                    Related Tools
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  {relatedTools.map((relatedTool) => (
-                    <Link
-                      key={relatedTool.id}
-                      to={`/tool/${relatedTool.id}`}
-                      className="block p-3 rounded-lg border border-border hover:bg-muted transition-colors group"
-                    >
-                      <div className="font-medium text-foreground mb-1 group-hover:text-primary transition-colors">
-                        {relatedTool.name}
-                      </div>
-                      <div className="text-xs text-muted-foreground line-clamp-2">
-                        {relatedTool.description}
-                      </div>
-                    </Link>
-                  ))}
-                </CardContent>
-              </Card>
-            )}
           </div>
         </div>
+
+        {/* Bottom Section: Related Tools (Full Width) */}
+        {relatedTools.length > 0 && (
+          <div className="border-t pt-8 w-full">
+            <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
+              <Sparkles className="h-5 w-5 text-primary" />
+              Related Tools
+            </h2>
+            
+            {/* Scroll Area spans full container width now */}
+            <ScrollArea className="w-full whitespace-nowrap pb-4">
+              <div className="flex w-max space-x-4 p-1 pb-4">
+                {relatedTools.map((relatedTool) => (
+                  <div key={relatedTool.id} className="w-[280px] md:w-[300px] h-[380px]">
+                    <ToolCard tool={relatedTool} />
+                  </div>
+                ))}
+              </div>
+              <ScrollBar orientation="horizontal" />
+            </ScrollArea>
+          </div>
+        )}
+
       </div>
     </div>
   );

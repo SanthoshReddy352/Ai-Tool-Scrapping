@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { Search, Filter, Sparkles, TrendingUp, Zap, BarChart3, Layers, ArrowRight, Star } from 'lucide-react';
+import { Search, Filter, Sparkles, TrendingUp, Zap, BarChart3, Layers, ArrowRight, Tag } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -25,9 +25,18 @@ const HomePage: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>(searchParams.get('category') || 'all');
   const [searchTerm, setSearchTerm] = useState('');
   const debouncedSearch = useDebounce(searchTerm, 500);
+  
+  // Updated Stats State
+  const [stats, setStats] = useState({
+    totalTools: 0,
+    totalCategories: 0,
+    newToday: 0,
+    totalTags: 0
+  });
 
   useEffect(() => {
     loadCategories();
+    loadStats();
   }, []);
 
   useEffect(() => {
@@ -44,6 +53,11 @@ const HomePage: React.FC = () => {
   const loadCategories = async () => {
     const data = await toolsApi.getCategories();
     setCategories(data);
+  };
+
+  const loadStats = async () => {
+    const data = await toolsApi.getPlatformStats();
+    setStats(data);
   };
 
   const loadTools = async (reset = false, pageIndex?: number) => {
@@ -91,19 +105,19 @@ const HomePage: React.FC = () => {
     }
   };
 
-  // Stats for the stats section
-  const stats = [
-    { label: 'AI Tools', value: '500+', icon: Layers, color: 'text-primary' },
-    { label: 'Categories', value: categories.length.toString(), icon: BarChart3, color: 'text-accent' },
-    { label: 'Daily Updates', value: '20+', icon: TrendingUp, color: 'text-success' },
-    { label: 'Active Users', value: '10K+', icon: Zap, color: 'text-chart-4' },
+  // Updated Stats Configuration with "Tags Tracked"
+  const statsConfig = [
+    { label: 'AI Tools', value: `${stats.totalTools}+`, icon: Layers, color: 'text-primary' },
+    { label: 'Categories', value: `${stats.totalCategories}+`, icon: BarChart3, color: 'text-accent' },
+    { label: 'Added Today', value: `${stats.newToday}`, icon: TrendingUp, color: 'text-success' },
+    { label: 'Tags Tracked', value: `${stats.totalTags}+`, icon: Tag, color: 'text-chart-4' },
   ];
 
   return (
     <div className="min-h-screen bg-background">
       {/* Enhanced Hero Section */}
       <section className="relative bg-gradient-to-br from-primary/10 via-accent/5 to-background py-20 px-4 overflow-hidden">
-        {/* Animated background elements with parallax effect */}
+        {/* Animated background elements */}
         <motion.div
           className="absolute top-20 left-10 w-96 h-96 bg-gradient-to-br from-primary/20 to-accent/20 rounded-full blur-3xl"
           animate={{
@@ -255,7 +269,7 @@ const HomePage: React.FC = () => {
       <section className="max-w-7xl mx-auto px-4 -mt-8 mb-12 relative z-20">
         <FadeInWhenVisible direction="up" duration={0.5}>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {stats.map((stat, index) => (
+            {statsConfig.map((stat, index) => (
               <motion.div
                 key={stat.label}
                 initial={{ opacity: 0, y: 20 }}

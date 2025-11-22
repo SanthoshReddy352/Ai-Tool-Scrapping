@@ -3,8 +3,6 @@ import { Link } from "react-router-dom";
 import { Sparkles, Github, Twitter, Mail, Heart, TrendingUp, Zap, Star } from "lucide-react";
 import { motion } from "framer-motion";
 import { useInView } from "react-intersection-observer";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 
 const Footer: React.FC = () => {
   const currentYear = new Date().getFullYear();
@@ -67,42 +65,7 @@ const Footer: React.FC = () => {
         initial="hidden"
         animate={inView ? "visible" : "hidden"}
       >
-        {/* Newsletter Section */}
-        <motion.div 
-          className="mb-12 p-8 rounded-2xl bg-gradient-to-r from-primary/10 via-accent/10 to-primary/10 border border-primary/20"
-          variants={itemVariants}
-        >
-          <div className="max-w-2xl mx-auto text-center">
-            <motion.div
-              className="inline-flex items-center gap-2 mb-4"
-              animate={{ y: [0, -5, 0] }}
-              transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-            >
-              <Mail className="h-6 w-6 text-primary" />
-              <h3 className="text-2xl font-bold text-foreground">
-                Stay Updated
-              </h3>
-            </motion.div>
-            <p className="text-muted-foreground mb-6">
-              Get the latest AI tools delivered to your inbox weekly
-            </p>
-            <div className="flex gap-3 max-w-md mx-auto">
-              <Input 
-                type="email" 
-                placeholder="Enter your email" 
-                className="h-12"
-              />
-              <motion.div
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                <Button size="lg" className="h-12 bg-primary hover:bg-primary-hover">
-                  Subscribe
-                </Button>
-              </motion.div>
-            </div>
-          </div>
-        </motion.div>
+        {/* Newsletter Section Removed Here */}
 
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
           <motion.div 

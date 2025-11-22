@@ -133,5 +133,42 @@ export const toolsApi = {
       console.error('Error in getRecentTools:', error);
       return [];
     }
+  },
+
+  async getPlatformStats() {
+    try {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      // Fetch all stats in parallel, including a new query for tags
+      const [totalTools, categories, newToday, tagsData] = await Promise.all([
+        supabase.from('ai_tools').select('*', { count: 'exact', head: true }),
+        supabase.from('categories').select('id', { count: 'exact', head: true }),
+        supabase.from('ai_tools')
+          .select('*', { count: 'exact', head: true })
+          .gte('created_at', today.toISOString()),
+        supabase.from('ai_tools').select('tags')
+      ]);
+
+      // Calculate unique tags count manually
+      const uniqueTags = new Set<string>();
+      if (tagsData.data) {
+        tagsData.data.forEach(item => {
+          if (Array.isArray(item.tags)) {
+            item.tags.forEach(tag => uniqueTags.add(tag));
+          }
+        });
+      }
+
+      return {
+        totalTools: totalTools.count || 0,
+        totalCategories: categories.count || 0,
+        newToday: newToday.count || 0,
+        totalTags: uniqueTags.size // Added this
+      };
+    } catch (error) {
+      console.error('Error fetching stats:', error);
+      return { totalTools: 0, totalCategories: 0, newToday: 0, totalTags: 0 };
+    }
   }
 };
