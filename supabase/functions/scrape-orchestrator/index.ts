@@ -17,9 +17,8 @@ serve(async (req) => {
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    console.log('Starting scraping orchestrator...');
+    console.log('Starting parallel scraping orchestrator...');
 
-    // ADDED: scrape-devto and scrape-huggingface
     const scrapers = [
       { name: 'ProductHunt', function: 'scrape-producthunt' },
       { name: 'Reddit', function: 'scrape-reddit' },
@@ -31,52 +30,43 @@ serve(async (req) => {
       { name: 'Hugging Face', function: 'scrape-huggingface' }
     ];
 
-    const results: ScraperResult[] = [];
-
-    // Run scrapers sequentially
-    for (const scraper of scrapers) {
+    // FIX: Run scrapers in PARALLEL instead of sequentially
+    const scraperPromises = scrapers.map(async (scraper) => {
       const scraperStartTime = Date.now();
-      
       try {
-        console.log(`Running ${scraper.name} scraper...`);
+        // console.log(`Triggering ${scraper.name}...`);
         
+        // Invoke the function
         const { data, error } = await supabase.functions.invoke(scraper.function, {
           body: {}
         });
 
         const duration = Date.now() - scraperStartTime;
 
-        if (error) {
-          results.push({
-            scraper: scraper.name,
-            success: false,
-            error: error.message,
-            duration
-          });
-          console.error(`${scraper.name} scraper failed:`, error);
-        } else {
-          results.push({
-            scraper: scraper.name,
-            success: true,
-            results: data,
-            duration
-          });
-          console.log(`${scraper.name} scraper completed in ${duration}ms`);
-        }
+        if (error) throw error;
+
+        // console.log(`${scraper.name} finished in ${duration}ms`);
+        return {
+          scraper: scraper.name,
+          success: true,
+          results: data,
+          duration
+        };
+
       } catch (error) {
         const duration = Date.now() - scraperStartTime;
-        results.push({
+        console.error(`${scraper.name} scraper failed:`, error);
+        return {
           scraper: scraper.name,
           success: false,
-          error: error.message,
+          error: error.message || 'Unknown error',
           duration
-        });
-        console.error(`${scraper.name} scraper error:`, error);
+        };
       }
+    });
 
-      // Wait 2 seconds between scrapers to avoid rate limiting
-      await new Promise(resolve => setTimeout(resolve, 2000));
-    }
+    // Wait for all scrapers to finish (Promise.all runs them concurrently)
+    const results = await Promise.all(scraperPromises);
 
     // Calculate summary statistics
     const summary = {
@@ -102,9 +92,7 @@ serve(async (req) => {
       details: results
     });
 
-    if (logError) {
-      console.error('Failed to log scraping run:', logError);
-    }
+    if (logError) console.error('Failed to log scraping run:', logError);
 
     return new Response(
       JSON.stringify({
