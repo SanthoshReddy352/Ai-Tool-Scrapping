@@ -19,14 +19,16 @@ serve(async (req) => {
 
     console.log('Starting scraping orchestrator...');
 
-    // Full list of scrapers to run
+    // ADDED: scrape-devto and scrape-huggingface
     const scrapers = [
       { name: 'ProductHunt', function: 'scrape-producthunt' },
       { name: 'Reddit', function: 'scrape-reddit' },
       { name: 'Hacker News', function: 'scrape-hackernews' },
       { name: 'GitHub', function: 'scrape-github' },
       { name: 'YouTube', function: 'scrape-youtube' },
-      { name: 'RSS Feeds', function: 'scrape-rss' }
+      { name: 'RSS Feeds', function: 'scrape-rss' },
+      { name: 'Dev.to', function: 'scrape-devto' },
+      { name: 'Hugging Face', function: 'scrape-huggingface' }
     ];
 
     const results: ScraperResult[] = [];
@@ -72,7 +74,7 @@ serve(async (req) => {
         console.error(`${scraper.name} scraper error:`, error);
       }
 
-      // Wait 2 seconds between scrapers to avoid rate limiting/concurrency issues
+      // Wait 2 seconds between scrapers to avoid rate limiting
       await new Promise(resolve => setTimeout(resolve, 2000));
     }
 
