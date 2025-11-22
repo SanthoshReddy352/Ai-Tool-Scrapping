@@ -28,3 +28,4 @@ package-lock.json
 history/*.json
 .vite_cache
 .env
+.env.local
