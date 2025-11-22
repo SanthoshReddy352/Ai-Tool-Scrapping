@@ -19,17 +19,19 @@ serve(async (req) => {
 
     console.log('Starting scraping orchestrator...');
 
-    // UPDATED: Added 'Hacker News' to the list
+    // Full list of scrapers to run
     const scrapers = [
       { name: 'ProductHunt', function: 'scrape-producthunt' },
       { name: 'Reddit', function: 'scrape-reddit' },
       { name: 'Hacker News', function: 'scrape-hackernews' },
+      { name: 'GitHub', function: 'scrape-github' },
+      { name: 'YouTube', function: 'scrape-youtube' },
       { name: 'RSS Feeds', function: 'scrape-rss' }
     ];
 
     const results: ScraperResult[] = [];
 
-    // Run scrapers sequentially to avoid rate limiting
+    // Run scrapers sequentially
     for (const scraper of scrapers) {
       const scraperStartTime = Date.now();
       
@@ -70,7 +72,7 @@ serve(async (req) => {
         console.error(`${scraper.name} scraper error:`, error);
       }
 
-      // Wait 2 seconds between scrapers to avoid rate limiting
+      // Wait 2 seconds between scrapers to avoid rate limiting/concurrency issues
       await new Promise(resolve => setTimeout(resolve, 2000));
     }
 
@@ -101,8 +103,6 @@ serve(async (req) => {
     if (logError) {
       console.error('Failed to log scraping run:', logError);
     }
-
-    console.log('Scraping orchestrator completed:', summary);
 
     return new Response(
       JSON.stringify({

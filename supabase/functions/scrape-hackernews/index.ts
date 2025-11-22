@@ -1,5 +1,5 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
-import { createClient } from 'npm:@supabase/supabase-js@2';
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 import { isDuplicate, normalizeUrl } from '../utils/deduplication.ts';
 import { categorizeToolAuto, extractTags, cleanDescription } from '../utils/categorization.ts';
 
@@ -7,7 +7,7 @@ interface HNItem {
   id: number;
   title: string;
   url?: string;
-  text?: string; // Some posts have text instead of URL
+  text?: string;
   score: number;
   time: number;
   by: string;
@@ -30,35 +30,30 @@ serve(async (req) => {
       errors_detail: [] as string[]
     };
 
-    // 1. Fetch "Show HN" stories (best for new tools)
-    // We use the official Firebase API which is free and public
+    // Fetch "Show HN" stories
     const response = await fetch('https://hacker-news.firebaseio.com/v0/showstories.json');
     if (!response.ok) throw new Error('Failed to fetch Show HN stories');
     
     const storyIds: number[] = await response.json();
     
-    // Limit to top 30 to avoid timeouts and rate limits
+    // Limit to top 30
     const recentStoryIds = storyIds.slice(0, 30);
     results.total = recentStoryIds.length;
 
     for (const id of recentStoryIds) {
       try {
-        // 2. Fetch details for each story
         const itemResponse = await fetch(`https://hacker-news.firebaseio.com/v0/item/${id}.json`);
         if (!itemResponse.ok) continue;
         
         const item: HNItem = await itemResponse.json();
 
-        // Skip if it's not a tool (no URL) or deleted
         if (!item.url || item.type !== 'story') {
           continue;
         }
 
-        // 3. Clean up the data
         const toolName = cleanHNTitle(item.title);
         const description = item.text || `${item.title} (via Hacker News)`;
 
-        // 4. Check for duplicates
         const duplicate = await isDuplicate(supabase, {
           name: toolName,
           url: normalizeUrl(item.url),
@@ -70,19 +65,17 @@ serve(async (req) => {
           continue;
         }
 
-        // 5. Categorize and Tag
         const category = categorizeToolAuto(toolName, description);
         const tags = extractTags(toolName, description);
         tags.push('show hn', 'hacker news');
 
-        // 6. Insert into DB
         const { error } = await supabase.from('ai_tools').insert({
           name: toolName,
           description: cleanDescription(description),
           url: normalizeUrl(item.url),
           category,
-          tags: Array.from(new Set(tags)), // Remove duplicate tags
-          image_url: null, // HN doesn't provide images
+          tags: Array.from(new Set(tags)),
+          image_url: null,
           release_date: new Date(item.time * 1000).toISOString().split('T')[0],
           source: 'Hacker News'
         });
@@ -91,7 +84,6 @@ serve(async (req) => {
           results.errors++;
           results.errors_detail.push(`${toolName}: ${error.message}`);
         } else {
-          console.log(`Added: ${toolName}`);
           results.added++;
         }
 
@@ -115,10 +107,9 @@ serve(async (req) => {
   }
 });
 
-// Helper to strip "Show HN:" prefix
 function cleanHNTitle(title: string): string {
   return title
-    .replace(/^Show HN:\s*/i, '') // Remove "Show HN:"
-    .replace(/\s-\s.*$/, '')      // Remove " - Description" part if present
+    .replace(/^Show HN:\s*/i, '')
+    .replace(/\s-\s.*$/, '')
     .trim();
 }

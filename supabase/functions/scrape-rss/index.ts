@@ -1,7 +1,7 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'npm:@supabase/supabase-js@2';
 import { isDuplicate, normalizeUrl } from '../utils/deduplication.ts';
-import { categorizeToolAuto, extractTags, cleanDescription } from '../utils/categorization.ts';
+import { parseWithLLM } from '../utils/llm.ts';
 import { retryWithBackoff } from '../utils/retry.ts';
 
 interface RSSFeed {
@@ -44,22 +44,35 @@ serve(async (req) => {
 
         for (const item of items) {
           try {
-            // Check if it's about a tool launch
+            // 1. Heuristic Filter: Check if it looks like a tool launch to save LLM tokens
             if (!isToolLaunch(item)) {
               continue;
             }
 
-            // Extract tool URL from article
+            // 2. Extract URL: We still need a valid URL to proceed
             const toolUrl = await extractToolUrlFromArticle(item.link);
             if (!toolUrl) {
               continue;
             }
 
-            // Check for duplicates
+            // 3. LLM Parsing: Use Gemini to get clean data
+            const llmResult = await parseWithLLM(item.title, item.description);
+
+            // If LLM says it's not a tool (double-check), skip it
+            if (!llmResult.is_tool) {
+              continue;
+            }
+
+            const name = llmResult.name || item.title; // Fallback to title
+            const description = llmResult.description || item.description;
+            const category = llmResult.category || 'Other';
+            const tags = llmResult.tags || [];
+
+            // 4. Deduplication
             const duplicate = await isDuplicate(supabase, {
-              name: extractToolNameFromTitle(item.title),
+              name: name,
               url: normalizeUrl(toolUrl),
-              description: item.description
+              description: description
             });
 
             if (duplicate) {
@@ -67,14 +80,10 @@ serve(async (req) => {
               continue;
             }
 
-            // Categorize and extract tags
-            const category = categorizeToolAuto(item.title, item.description);
-            const tags = extractTags(item.title, item.description);
-
-            // Insert into database
+            // 5. Insert into DB
             const { error } = await supabase.from('ai_tools').insert({
-              name: extractToolNameFromTitle(item.title),
-              description: cleanDescription(item.description),
+              name: name,
+              description: description,
               url: normalizeUrl(toolUrl),
               category,
               tags: Array.from(new Set(tags)),
@@ -85,7 +94,7 @@ serve(async (req) => {
 
             if (error) {
               results.errors++;
-              results.errors_detail.push(`${item.title}: ${error.message}`);
+              results.errors_detail.push(`${name}: ${error.message}`);
             } else {
               results.added++;
             }
@@ -126,14 +135,11 @@ async function fetchRSSFeed(url: string): Promise<RSSItem[]> {
 
 function parseRSS(xml: string): RSSItem[] {
   const items: RSSItem[] = [];
-  
-  // Simple XML parsing (in production, use a proper XML parser)
   const itemRegex = /<item>([\s\S]*?)<\/item>/g;
   const matches = xml.matchAll(itemRegex);
 
   for (const match of matches) {
     const itemXml = match[1];
-    
     const title = extractXMLTag(itemXml, 'title');
     const description = extractXMLTag(itemXml, 'description');
     const link = extractXMLTag(itemXml, 'link');
@@ -148,7 +154,6 @@ function parseRSS(xml: string): RSSItem[] {
       });
     }
   }
-
   return items;
 }
 
@@ -172,63 +177,27 @@ function cleanHTML(html: string): string {
 
 function isToolLaunch(item: RSSItem): boolean {
   const text = `${item.title} ${item.description}`.toLowerCase();
-  
-  const launchKeywords = [
-    'launch', 'releases', 'introduces', 'unveils', 'announces',
-    'debuts', 'rolls out', 'new tool', 'new ai', 'startup'
-  ];
-
-  const excludeKeywords = [
-    'opinion', 'analysis', 'interview', 'podcast', 'video'
-  ];
-
-  const hasLaunch = launchKeywords.some(keyword => text.includes(keyword));
-  const hasExclude = excludeKeywords.some(keyword => text.includes(keyword));
-
-  return hasLaunch && !hasExclude;
+  const launchKeywords = ['launch', 'releases', 'introduces', 'unveils', 'announces', 'debuts', 'rolls out', 'new tool', 'new ai', 'startup'];
+  const excludeKeywords = ['opinion', 'analysis', 'interview', 'podcast', 'video'];
+  return launchKeywords.some(k => text.includes(k)) && !excludeKeywords.some(k => text.includes(k));
 }
 
 async function extractToolUrlFromArticle(articleUrl: string): Promise<string | null> {
   try {
     const response = await fetch(articleUrl);
     if (!response.ok) return null;
-
     const html = await response.text();
     
-    // Look for common patterns of tool URLs in articles
-    const urlRegex = /https?:\/\/(?!(?:techcrunch|theverge|venturebeat|twitter|facebook|linkedin)\.com)[a-zA-Z0-9-]+\.[a-zA-Z]{2,}(?:\/[^\s"'<>]*)?/g;
+    // Look for external links that aren't common social/news sites
+    const urlRegex = /https?:\/\/(?!(?:techcrunch|theverge|venturebeat|twitter|facebook|linkedin|youtube|google)\.com)[a-zA-Z0-9-]+\.[a-zA-Z]{2,}(?:\/[^\s"'<>]*)?/g;
     const matches = html.match(urlRegex);
 
     if (matches && matches.length > 0) {
-      // Return the first external URL that's not a social media link
-      for (const url of matches) {
-        if (!url.includes('twitter.com') && 
-            !url.includes('facebook.com') && 
-            !url.includes('linkedin.com') &&
-            !url.includes('youtube.com')) {
-          return url;
-        }
-      }
+       // Return the first valid external link
+       return matches[0]; 
     }
-
     return null;
   } catch {
     return null;
   }
-}
-
-function extractToolNameFromTitle(title: string): string {
-  // Remove common news article patterns
-  let name = title
-    .replace(/^.*?(launches|releases|introduces|unveils|announces)\s+/gi, '')
-    .replace(/,.*$/g, '')
-    .trim();
-
-  // Take first part if there's a dash
-  const parts = name.split(/[-–—]/);
-  if (parts.length > 0) {
-    name = parts[0].trim();
-  }
-
-  return name;
 }
