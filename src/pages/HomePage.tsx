@@ -1,18 +1,37 @@
-import React, { useState, useEffect } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
-import { Search, Filter, Sparkles, TrendingUp, Zap, BarChart3, Layers, ArrowRight, Tag } from 'lucide-react';
-import { motion } from 'framer-motion';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ToolCard } from '@/components/tools/ToolCard';
-import { ToolCardSkeleton } from '@/components/tools/ToolCardSkeleton';
-import { FadeInWhenVisible } from '@/components/animations/FadeInWhenVisible';
-import { StaggerContainer, StaggerItem } from '@/components/animations/StaggerContainer';
-import { toolsApi } from '@/db/api';
-import type { AITool, Category } from '@/types/types';
-import { useDebounce } from '@/hooks/use-debounce';
-import { Card, CardContent } from '@/components/ui/card';
+import React, { useState, useEffect } from "react";
+import { Link, useSearchParams } from "react-router-dom";
+import {
+  Search,
+  Filter,
+  Sparkles,
+  TrendingUp,
+  Zap,
+  BarChart3,
+  Layers,
+  ArrowRight,
+  Tag,
+} from "lucide-react";
+import { motion } from "framer-motion";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { ToolCard } from "@/components/tools/ToolCard";
+import { ToolCardSkeleton } from "@/components/tools/ToolCardSkeleton";
+import { FadeInWhenVisible } from "@/components/animations/FadeInWhenVisible";
+import {
+  StaggerContainer,
+  StaggerItem,
+} from "@/components/animations/StaggerContainer";
+import { toolsApi } from "@/db/api";
+import type { AITool, Category } from "@/types/types";
+import { useDebounce } from "@/hooks/use-debounce";
+import { Card, CardContent } from "@/components/ui/card";
 
 const HomePage: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -22,16 +41,18 @@ const HomePage: React.FC = () => {
   const [loadingMore, setLoadingMore] = useState(false);
   const [page, setPage] = useState(0);
   const [hasMore, setHasMore] = useState(true);
-  const [selectedCategory, setSelectedCategory] = useState<string>(searchParams.get('category') || 'all');
-  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState<string>(
+    searchParams.get("category") || "all"
+  );
+  const [searchTerm, setSearchTerm] = useState("");
   const debouncedSearch = useDebounce(searchTerm, 500);
-  
+
   // Updated Stats State
   const [stats, setStats] = useState({
     totalTools: 0,
     totalCategories: 0,
     newToday: 0,
-    totalTags: 0
+    totalTags: 0,
   });
 
   useEffect(() => {
@@ -40,7 +61,7 @@ const HomePage: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    const categoryParam = searchParams.get('category');
+    const categoryParam = searchParams.get("category");
     if (categoryParam) {
       setSelectedCategory(categoryParam);
     }
@@ -61,8 +82,8 @@ const HomePage: React.FC = () => {
   };
 
   const loadTools = async (reset = false, pageIndex?: number) => {
-    const currentPage = reset ? 0 : (pageIndex ?? page);
-    
+    const currentPage = reset ? 0 : pageIndex ?? page;
+
     if (reset) {
       setLoading(true);
       setTools([]);
@@ -71,19 +92,19 @@ const HomePage: React.FC = () => {
     }
 
     const filters = {
-      category: selectedCategory !== 'all' ? selectedCategory : undefined,
+      category: selectedCategory !== "all" ? selectedCategory : undefined,
       search: debouncedSearch || undefined,
     };
 
     const data = await toolsApi.getTools(currentPage, filters);
-    
+
     if (reset) {
       setTools(data);
       setPage(0);
     } else {
-      setTools(prev => [...prev, ...data]);
+      setTools((prev) => [...prev, ...data]);
     }
-    
+
     setHasMore(data.length === 12);
     setLoading(false);
     setLoadingMore(false);
@@ -98,7 +119,7 @@ const HomePage: React.FC = () => {
   const handleCategoryChange = (value: string) => {
     setSelectedCategory(value);
     setPage(0);
-    if (value !== 'all') {
+    if (value !== "all") {
       setSearchParams({ category: value });
     } else {
       setSearchParams({});
@@ -107,10 +128,30 @@ const HomePage: React.FC = () => {
 
   // Updated Stats Configuration with "Tags Tracked"
   const statsConfig = [
-    { label: 'AI Tools', value: `${stats.totalTools}+`, icon: Layers, color: 'text-primary' },
-    { label: 'Categories', value: `${stats.totalCategories}+`, icon: BarChart3, color: 'text-accent' },
-    { label: 'Added Today', value: `${stats.newToday}`, icon: TrendingUp, color: 'text-success' },
-    { label: 'Tags Tracked', value: `${stats.totalTags}+`, icon: Tag, color: 'text-chart-4' },
+    {
+      label: "AI Tools",
+      value: `${stats.totalTools}+`,
+      icon: Layers,
+      color: "text-primary",
+    },
+    {
+      label: "Categories",
+      value: `${stats.totalCategories}+`,
+      icon: BarChart3,
+      color: "text-accent",
+    },
+    {
+      label: "Added Today",
+      value: `${stats.newToday}`,
+      icon: TrendingUp,
+      color: "text-success",
+    },
+    {
+      label: "Tags Tracked",
+      value: `${stats.totalTags}+`,
+      icon: Tag,
+      color: "text-chart-4",
+    },
   ];
 
   return (
@@ -158,26 +199,26 @@ const HomePage: React.FC = () => {
             ease: "easeInOut",
           }}
         />
-        
+
         <div className="max-w-7xl mx-auto text-center relative z-10">
           <FadeInWhenVisible direction="down" duration={0.6}>
             <div className="flex items-center justify-center gap-3 mb-6">
               <motion.div
                 className="p-3 bg-gradient-to-br from-primary to-accent rounded-2xl relative overflow-hidden shadow-lg"
-                animate={{ 
+                animate={{
                   rotate: [0, 5, -5, 0],
-                  scale: [1, 1.05, 1]
+                  scale: [1, 1.05, 1],
                 }}
-                transition={{ 
+                transition={{
                   duration: 4,
                   repeat: Infinity,
-                  ease: "easeInOut"
+                  ease: "easeInOut",
                 }}
               >
                 <Sparkles className="h-10 w-10 text-white relative z-10" />
                 <motion.div
                   className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent"
-                  animate={{ x: ['-100%', '200%'] }}
+                  animate={{ x: ["-100%", "200%"] }}
                   transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
                 />
               </motion.div>
@@ -190,28 +231,34 @@ const HomePage: React.FC = () => {
               <span className="text-foreground">AI Tools</span>
             </h1>
           </FadeInWhenVisible>
-          
+
           <FadeInWhenVisible delay={0.2} duration={0.6}>
             <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto mb-10 leading-relaxed">
-              Your centralized platform for tracking and discovering newly released AI tools from across the internet. 
-              <span className="text-primary font-semibold"> Stay ahead with real-time updates</span> on the latest AI innovations.
+              Your centralized platform for tracking and discovering newly
+              released AI tools from across the internet.
+              <span className="text-primary font-semibold">
+                {" "}
+                Stay ahead with real-time updates
+              </span>{" "}
+              on the latest AI innovations.
             </p>
           </FadeInWhenVisible>
-          
+
           <FadeInWhenVisible delay={0.4} direction="up" duration={0.6}>
             <div className="flex flex-col md:flex-row gap-4 max-w-4xl mx-auto mb-8">
-              <motion.div 
+              <motion.div
                 className="relative flex-1"
                 whileHover={{ scale: 1.02 }}
                 transition={{ duration: 0.2 }}
               >
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 backdrop-blur-none" />
                 <Input
                   type="text"
                   placeholder="Search AI tools, categories, or features..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-12 h-14 text-base border-2 border-border/50 focus:border-primary transition-all shadow-lg backdrop-blur-sm bg-card/80"
+                  className="pl-12 h-14 text-base border-2 border-border/50 
+focus:border-primary transition-all shadow-lg bg-card"
                   data-testid="search-input"
                 />
               </motion.div>
@@ -219,8 +266,14 @@ const HomePage: React.FC = () => {
                 whileHover={{ scale: 1.02 }}
                 transition={{ duration: 0.2 }}
               >
-                <Select value={selectedCategory} onValueChange={handleCategoryChange}>
-                  <SelectTrigger className="w-full md:w-[240px] h-14 text-base border-2 border-border/50 focus:border-primary transition-all shadow-lg backdrop-blur-sm bg-card/80" data-testid="category-select">
+                <Select
+                  value={selectedCategory}
+                  onValueChange={handleCategoryChange}
+                >
+                  <SelectTrigger
+                    className="w-full md:w-[240px] h-14 text-base border-2 border-border/50 focus:border-primary transition-all shadow-lg backdrop-blur-sm bg-card/80"
+                    data-testid="category-select"
+                  >
                     <Filter className="h-5 w-5 mr-2" />
                     <SelectValue placeholder="All Categories" />
                   </SelectTrigger>
@@ -244,7 +297,11 @@ const HomePage: React.FC = () => {
                   whileHover={{ scale: 1.05, y: -2 }}
                   whileTap={{ scale: 0.95 }}
                 >
-                  <Button size="lg" className="h-12 px-8 bg-primary hover:bg-primary-hover shadow-lg text-base" data-testid="browse-categories-btn">
+                  <Button
+                    size="lg"
+                    className="h-12 px-8 bg-primary hover:bg-primary-hover shadow-lg text-base"
+                    data-testid="browse-categories-btn"
+                  >
                     Browse Categories
                     <ArrowRight className="ml-2 h-5 w-5" />
                   </Button>
@@ -255,7 +312,12 @@ const HomePage: React.FC = () => {
                   whileHover={{ scale: 1.05, y: -2 }}
                   whileTap={{ scale: 0.95 }}
                 >
-                  <Button size="lg" variant="outline" className="h-12 px-8 shadow-lg border-2 text-base" data-testid="learn-more-btn">
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    className="h-12 px-8 shadow-lg border-2 text-base"
+                    data-testid="learn-more-btn"
+                  >
                     Learn More
                   </Button>
                 </motion.div>
@@ -281,21 +343,25 @@ const HomePage: React.FC = () => {
                   <CardContent className="p-6 text-center">
                     <motion.div
                       className="inline-block mb-3"
-                      animate={{ 
+                      animate={{
                         rotate: [0, 10, -10, 0],
-                        scale: [1, 1.1, 1]
+                        scale: [1, 1.1, 1],
                       }}
-                      transition={{ 
+                      transition={{
                         duration: 3,
                         repeat: Infinity,
                         ease: "easeInOut",
-                        delay: index * 0.2
+                        delay: index * 0.2,
                       }}
                     >
                       <stat.icon className={`h-8 w-8 ${stat.color}`} />
                     </motion.div>
-                    <p className="text-3xl font-bold text-foreground mb-1">{stat.value}</p>
-                    <p className="text-sm text-muted-foreground">{stat.label}</p>
+                    <p className="text-3xl font-bold text-foreground mb-1">
+                      {stat.value}
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      {stat.label}
+                    </p>
                   </CardContent>
                 </Card>
               </motion.div>
@@ -311,24 +377,39 @@ const HomePage: React.FC = () => {
             <div className="flex items-center gap-3">
               <motion.div
                 className="p-2 bg-gradient-to-br from-primary/20 to-accent/20 rounded-lg"
-                animate={{ 
+                animate={{
                   y: [0, -5, 0],
-                  rotate: [0, 5, 0]
+                  rotate: [0, 5, 0],
                 }}
-                transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                transition={{
+                  duration: 2,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                }}
               >
                 <TrendingUp className="h-6 w-6 text-primary" />
               </motion.div>
               <div>
                 <h2 className="text-3xl font-bold text-foreground">
-                  {selectedCategory !== 'all' ? selectedCategory : 'Latest Tools'}
+                  {selectedCategory !== "all"
+                    ? selectedCategory
+                    : "Latest Tools"}
                 </h2>
-                <p className="text-sm text-muted-foreground">Discover the newest AI innovations</p>
+                <p className="text-sm text-muted-foreground">
+                  Discover the newest AI innovations
+                </p>
               </div>
             </div>
             <Link to="/categories">
-              <motion.div whileHover={{ scale: 1.05, x: 5 }} whileTap={{ scale: 0.95 }}>
-                <Button variant="outline" className="gap-2" data-testid="view-all-categories-btn">
+              <motion.div
+                whileHover={{ scale: 1.05, x: 5 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <Button
+                  variant="outline"
+                  className="gap-2"
+                  data-testid="view-all-categories-btn"
+                >
                   View All
                   <ArrowRight className="h-4 w-4" />
                 </Button>
@@ -346,17 +427,23 @@ const HomePage: React.FC = () => {
         ) : tools.length === 0 ? (
           <FadeInWhenVisible direction="up" duration={0.5}>
             <div className="text-center py-20">
-              <motion.div 
+              <motion.div
                 className="text-7xl mb-6"
-                animate={{ 
+                animate={{
                   scale: [1, 1.1, 1],
-                  rotate: [0, 5, -5, 0]
+                  rotate: [0, 5, -5, 0],
                 }}
-                transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                transition={{
+                  duration: 2,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                }}
               >
                 🔍
               </motion.div>
-              <h3 className="text-2xl font-semibold text-foreground mb-3">No tools found</h3>
+              <h3 className="text-2xl font-semibold text-foreground mb-3">
+                No tools found
+              </h3>
               <p className="text-muted-foreground text-lg">
                 Try adjusting your search or filter criteria
               </p>
@@ -364,7 +451,10 @@ const HomePage: React.FC = () => {
           </FadeInWhenVisible>
         ) : (
           <>
-            <StaggerContainer className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" staggerDelay={0.05}>
+            <StaggerContainer
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+              staggerDelay={0.05}
+            >
               {tools.map((tool) => (
                 <StaggerItem key={tool.id}>
                   <ToolCard tool={tool} />
@@ -392,21 +482,29 @@ const HomePage: React.FC = () => {
                           <>
                             <motion.div
                               animate={{ rotate: 360 }}
-                              transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                              transition={{
+                                duration: 1,
+                                repeat: Infinity,
+                                ease: "linear",
+                              }}
                             >
                               <Zap className="h-5 w-5" />
                             </motion.div>
                             Loading...
                           </>
                         ) : (
-                          'Load More Tools'
+                          "Load More Tools"
                         )}
                       </span>
                       {loadingMore && (
                         <motion.div
                           className="absolute inset-0 bg-primary/10"
-                          animate={{ x: ['-100%', '100%'] }}
-                          transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                          animate={{ x: ["-100%", "100%"] }}
+                          transition={{
+                            duration: 1,
+                            repeat: Infinity,
+                            ease: "linear",
+                          }}
                         />
                       )}
                     </Button>

@@ -1,25 +1,34 @@
-import React, { useState, useEffect } from 'react';
-import { Search, Filter, X, Sparkles } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ToolCard } from '@/components/tools/ToolCard';
-import { ToolCardSkeleton } from '@/components/tools/ToolCardSkeleton';
-import { FadeInWhenVisible } from '@/components/animations/FadeInWhenVisible';
-import { StaggerContainer, StaggerItem } from '@/components/animations/StaggerContainer';
-import { toolsApi } from '@/db/api';
-import type { AITool, Category } from '@/types/types';
-import { useDebounce } from '@/hooks/use-debounce';
+import React, { useState, useEffect } from "react";
+import { Search, Filter, X, Sparkles } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { ToolCard } from "@/components/tools/ToolCard";
+import { ToolCardSkeleton } from "@/components/tools/ToolCardSkeleton";
+import { FadeInWhenVisible } from "@/components/animations/FadeInWhenVisible";
+import {
+  StaggerContainer,
+  StaggerItem,
+} from "@/components/animations/StaggerContainer";
+import { toolsApi } from "@/db/api";
+import type { AITool, Category } from "@/types/types";
+import { useDebounce } from "@/hooks/use-debounce";
 
 const SearchPage: React.FC = () => {
   const [tools, setTools] = useState<AITool[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [allTags, setAllTags] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [page, setPage] = useState(0);
   const [hasMore, setHasMore] = useState(true);
@@ -43,29 +52,29 @@ const SearchPage: React.FC = () => {
   };
 
   const performSearch = async (reset = false, pageIndex?: number) => {
-    const currentPage = reset ? 0 : (pageIndex ?? page);
-    
+    const currentPage = reset ? 0 : pageIndex ?? page;
+
     setLoading(true);
-    
+
     if (reset) {
       setTools([]);
       setPage(0);
     }
 
     const filters = {
-      category: selectedCategory !== 'all' ? selectedCategory : undefined,
+      category: selectedCategory !== "all" ? selectedCategory : undefined,
       search: debouncedSearch || undefined,
       tags: selectedTags.length > 0 ? selectedTags : undefined,
     };
 
     const data = await toolsApi.getTools(currentPage, filters);
-    
+
     if (reset) {
       setTools(data);
     } else {
-      setTools(prev => [...prev, ...data]);
+      setTools((prev) => [...prev, ...data]);
     }
-    
+
     setHasMore(data.length === 12);
     setLoading(false);
   };
@@ -77,20 +86,19 @@ const SearchPage: React.FC = () => {
   };
 
   const toggleTag = (tag: string) => {
-    setSelectedTags(prev => 
-      prev.includes(tag) 
-        ? prev.filter(t => t !== tag)
-        : [...prev, tag]
+    setSelectedTags((prev) =>
+      prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]
     );
   };
 
   const clearFilters = () => {
-    setSearchTerm('');
-    setSelectedCategory('all');
+    setSearchTerm("");
+    setSelectedCategory("all");
     setSelectedTags([]);
   };
 
-  const hasActiveFilters = searchTerm || selectedCategory !== 'all' || selectedTags.length > 0;
+  const hasActiveFilters =
+    searchTerm || selectedCategory !== "all" || selectedTags.length > 0;
 
   return (
     <div className="min-h-screen bg-background">
@@ -122,14 +130,18 @@ const SearchPage: React.FC = () => {
             ease: "easeInOut",
           }}
         />
-        
+
         <div className="max-w-7xl mx-auto relative z-10">
           <FadeInWhenVisible direction="down" duration={0.6}>
             <div className="text-center mb-8">
               <motion.div
                 className="inline-flex items-center justify-center gap-2 mb-6"
                 animate={{ y: [0, -5, 0] }}
-                transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                transition={{
+                  duration: 2,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                }}
               >
                 <div className="p-3 bg-gradient-to-br from-accent to-primary rounded-2xl">
                   <Search className="h-10 w-10 text-white" />
@@ -139,7 +151,8 @@ const SearchPage: React.FC = () => {
                 <span className="gradient-text">Advanced Search</span>
               </h1>
               <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto">
-                Find the perfect AI tool for your needs using our powerful search and filtering options.
+                Find the perfect AI tool for your needs using our powerful
+                search and filtering options.
               </p>
             </div>
           </FadeInWhenVisible>
@@ -147,7 +160,7 @@ const SearchPage: React.FC = () => {
           <FadeInWhenVisible delay={0.3} direction="up" duration={0.6}>
             <div className="max-w-4xl mx-auto space-y-6">
               {/* Search Bar */}
-              <motion.div 
+              <motion.div
                 className="relative"
                 whileHover={{ scale: 1.01 }}
                 transition={{ duration: 0.2 }}
@@ -158,7 +171,8 @@ const SearchPage: React.FC = () => {
                   placeholder="Search by name, description, or features..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-12 h-14 text-base border-2 border-border/50 focus:border-primary shadow-lg glass"
+                  className="pl-12 h-14 text-base border-2 border-border/50 
+focus:border-primary transition-all shadow-lg bg-card"
                   data-testid="search-input"
                 />
               </motion.div>
@@ -170,8 +184,14 @@ const SearchPage: React.FC = () => {
                   transition={{ duration: 0.2 }}
                   className="flex-1"
                 >
-                  <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                    <SelectTrigger className="w-full h-12 border-2 glass" data-testid="category-filter">
+                  <Select
+                    value={selectedCategory}
+                    onValueChange={setSelectedCategory}
+                  >
+                    <SelectTrigger
+                      className="w-full h-12 border-2 glass"
+                      data-testid="category-filter"
+                    >
                       <Filter className="h-5 w-5 mr-2" />
                       <SelectValue placeholder="All Categories" />
                     </SelectTrigger>
@@ -196,8 +216,8 @@ const SearchPage: React.FC = () => {
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
                     >
-                      <Button 
-                        variant="outline" 
+                      <Button
+                        variant="outline"
                         onClick={clearFilters}
                         className="w-full md:w-auto h-12 border-2"
                         data-testid="clear-filters-btn"
@@ -215,7 +235,9 @@ const SearchPage: React.FC = () => {
                 <div className="glass p-6 rounded-2xl border-2 border-border/50">
                   <div className="flex items-center gap-2 mb-4">
                     <Sparkles className="h-5 w-5 text-primary" />
-                    <span className="text-sm font-semibold text-foreground">Filter by Tags</span>
+                    <span className="text-sm font-semibold text-foreground">
+                      Filter by Tags
+                    </span>
                   </div>
                   <div className="flex flex-wrap gap-2">
                     {allTags.slice(0, 20).map((tag, index) => (
@@ -228,7 +250,9 @@ const SearchPage: React.FC = () => {
                         whileTap={{ scale: 0.95 }}
                       >
                         <Badge
-                          variant={selectedTags.includes(tag) ? 'default' : 'outline'}
+                          variant={
+                            selectedTags.includes(tag) ? "default" : "outline"
+                          }
                           className="cursor-pointer hover:bg-primary/90 transition-all text-sm py-1.5 px-3"
                           onClick={() => toggleTag(tag)}
                           data-testid={`tag-${tag}`}
@@ -250,19 +274,23 @@ const SearchPage: React.FC = () => {
           <div className="mb-8">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-3xl font-bold text-foreground">
-                {loading && tools.length === 0 ? 'Searching...' : `${tools.length} Results`}
+                {loading && tools.length === 0
+                  ? "Searching..."
+                  : `${tools.length} Results`}
               </h2>
             </div>
             <AnimatePresence>
               {selectedTags.length > 0 && (
-                <motion.div 
+                <motion.div
                   className="flex flex-wrap gap-2 items-center"
                   initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: 'auto' }}
+                  animate={{ opacity: 1, height: "auto" }}
                   exit={{ opacity: 0, height: 0 }}
                   transition={{ duration: 0.3 }}
                 >
-                  <span className="text-sm font-medium text-muted-foreground">Active filters:</span>
+                  <span className="text-sm font-medium text-muted-foreground">
+                    Active filters:
+                  </span>
                   {selectedTags.map((tag, index) => (
                     <motion.div
                       key={tag}
@@ -273,7 +301,7 @@ const SearchPage: React.FC = () => {
                       whileHover={{ scale: 1.1 }}
                       whileTap={{ scale: 0.95 }}
                     >
-                      <Badge 
+                      <Badge
                         variant="default"
                         className="cursor-pointer gap-1 py-1.5 px-3"
                         onClick={() => toggleTag(tag)}
@@ -298,17 +326,23 @@ const SearchPage: React.FC = () => {
         ) : tools.length === 0 ? (
           <FadeInWhenVisible direction="up" duration={0.5}>
             <div className="text-center py-20">
-              <motion.div 
+              <motion.div
                 className="text-7xl mb-6"
-                animate={{ 
+                animate={{
                   scale: [1, 1.1, 1],
-                  rotate: [0, 5, -5, 0]
+                  rotate: [0, 5, -5, 0],
                 }}
-                transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                transition={{
+                  duration: 2,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                }}
               >
                 🔍
               </motion.div>
-              <h3 className="text-2xl font-semibold text-foreground mb-3">No tools found</h3>
+              <h3 className="text-2xl font-semibold text-foreground mb-3">
+                No tools found
+              </h3>
               <p className="text-muted-foreground text-lg mb-6">
                 Try adjusting your search terms or filters
               </p>
@@ -326,7 +360,10 @@ const SearchPage: React.FC = () => {
           </FadeInWhenVisible>
         ) : (
           <>
-            <StaggerContainer className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" staggerDelay={0.05}>
+            <StaggerContainer
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+              staggerDelay={0.05}
+            >
               {tools.map((tool) => (
                 <StaggerItem key={tool.id}>
                   <ToolCard tool={tool} />
@@ -349,7 +386,7 @@ const SearchPage: React.FC = () => {
                       className="h-12 px-8 border-2"
                       data-testid="load-more-btn"
                     >
-                      {loading ? 'Loading...' : 'Load More Results'}
+                      {loading ? "Loading..." : "Load More Results"}
                     </Button>
                   </motion.div>
                 </div>
