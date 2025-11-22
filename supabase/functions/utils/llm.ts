@@ -30,7 +30,7 @@ export async function parseWithLLM(title: string, content: string): Promise<LLMR
     const genAI = new GoogleGenerativeAI(apiKey);
     // Updated to use Gemini 2.5 Flash as 1.5 is deprecated
     const model = genAI.getGenerativeModel({ 
-      model: 'gemini-2.5-flash', 
+      model: 'gemini-2.0-flash-lite-001', 
       generationConfig: { 
         responseMimeType: "application/json",
         temperature: 0.1 // Low temperature for factual extraction
